@@ -64,25 +64,29 @@ background-color: var(--primary-text);
 color: var(--primary-background);
 }
 
-nav ul {
+#primary-nav {
 display: flex;
 padding: 0 1vw;
 justify-content: space-around;
 }
 
-nav li {
+#primary-nav li {
 list-style: none;
 padding-top: 1em;
 padding-bottom: 1em;
 }
 
 /* Added for the <%- nav %> insertion */
-nav a {
+#primary-nav a {
 color: var(--primary-background);
 text-decoration: none;
 font-size: .85rem;
 padding-top: 1em;
 padding-bottom: 1em;
+}
+
+#primary-nav a.active {
+border-bottom: 3px solid var(--main-accent);
 }
 /* END navigation.ejs style */
 
@@ -220,6 +224,109 @@ margin-top: 1em;
 }
 /* END index.ejs styles */
 
+/* BEGIN inventory styles */
+.inventory-wrapper {
+margin-top: 1.5rem;
+}
+
+.notice {
+background-color: #f9f5d7;
+border: 1px solid #f1d17a;
+padding: 1rem;
+border-radius: 4px;
+}
+
+.inv-grid {
+display: grid;
+gap: 1rem;
+padding: 0;
+list-style: none;
+grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.inv-card {
+background-color: #fff;
+border: 1px solid #e0e0e0;
+border-radius: 6px;
+box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.inv-card a {
+display: block;
+color: inherit;
+text-decoration: none;
+padding: 0.5rem;
+}
+
+.inv-card:hover {
+transform: translateY(-4px);
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.vehicle-title {
+font-weight: 600;
+margin: 0.5rem 0 0;
+}
+
+.vehicle-price {
+font-size: 1.1rem;
+font-weight: 700;
+color: var(--main-accent);
+margin: 0.25rem 0 0;
+}
+
+.vehicle-detail {
+display: flex;
+flex-direction: column;
+gap: 1.5rem;
+margin-top: 1.5rem;
+}
+
+.vehicle-media {
+flex: 1;
+}
+
+.vehicle-content {
+flex: 1;
+font-size: 1rem;
+line-height: 1.5;
+}
+
+.vehicle-content p {
+margin: 0.4rem 0;
+}
+
+.vehicle-description {
+margin-top: 1rem;
+font-size: 1.05rem;
+}
+
+.error-view {
+margin-top: 2rem;
+padding: 2rem;
+border: 1px solid #ffd6d6;
+border-radius: 8px;
+background-color: #fff5f5;
+text-align: center;
+}
+
+.error-code {
+font-size: 1.25rem;
+}
+
+.btn {
+display: inline-block;
+margin-top: 1rem;
+padding: 0.75rem 1.5rem;
+border-radius: 999px;
+text-decoration: none;
+background-color: var(--main-accent);
+color: var(--primary-text);
+font-weight: 700;
+}
+/* END inventory styles */
+
 @media only screen and (min-width: 768px) {
 body {
 background-image: linear-gradient(45deg, #000 25%, transparent 25%),
@@ -250,27 +357,27 @@ nav {
 margin-top: 0.75rem;
 }
 
-nav ul {
+#primary-nav {
 justify-content: space-evenly;
 padding: 0.5rem 0;
 margin: 0;
 }
 
-nav li {
+#primary-nav li {
 margin: 0;
 padding: 0;
 text-align: center;
 }
 
 /* Added for the <%- nav %> insertion */
-nav a {
+#primary-nav a {
 display: inline-block;
 width: 4.5em;
 padding: .25rem 0;
 font-size: 1rem;
 }
 
-nav a:hover {
+#primary-nav a:hover {
 color: var(--primary-text);
 background-color: var(--primary-background);
 }
@@ -293,4 +400,19 @@ font-weight: 800;
 font-size: large;
 }
 /* END index.ejs styles */
+
+/* BEGIN inventory styles (desktop) */
+.vehicle-detail {
+flex-direction: row;
+align-items: flex-start;
+}
+
+.vehicle-media img {
+border-radius: 8px;
+}
+
+.vehicle-content {
+padding: 0 1rem;
+}
+/* END inventory styles (desktop) */
 }
