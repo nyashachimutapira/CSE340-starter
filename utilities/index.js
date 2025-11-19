@@ -27,6 +27,27 @@ utilities.getNav = async function getNav(activeClassificationId = null) {
 };
 
 /**
+ * Build the classification select list for forms.
+ * @param {number|null} selectedId
+ * @returns {Promise<string>}
+ */
+utilities.buildClassificationList = async function buildClassificationList(selectedId = null) {
+  const classifications = await invModel.getClassifications();
+  let classificationList =
+    '<select name="classification_id" id="classificationList" required>';
+  classificationList += "<option value=''>Choose a Classification</option>";
+
+  classifications.forEach((classification) => {
+    classificationList += `<option value="${classification.classification_id}"${
+      Number(selectedId) === classification.classification_id ? " selected" : ""
+    }>${classification.classification_name}</option>`;
+  });
+
+  classificationList += "</select>";
+  return classificationList;
+};
+
+/**
  * Build the HTML grid for a set of vehicles grouped by classification.
  * @param {Array<object>} data
  * @returns {string}

@@ -101,6 +101,30 @@ padding: 0;
 font-size: 0.9rem;
 }
 
+.alert {
+margin: 1rem 0;
+padding: 1rem;
+border-radius: 6px;
+}
+
+.alert-success {
+background-color: #edfcec;
+border: 1px solid #7fd37b;
+color: #1c5a18;
+}
+
+.alert-info {
+background-color: #e7f5ff;
+border: 1px solid #5fb5f5;
+color: #0b5085;
+}
+
+.alert-error {
+background-color: #ffeeef;
+border: 1px solid #f29b9f;
+color: #7c1d21;
+}
+
 hr {
 border: 2px solid var(--primary-text);
 margin: 0;
@@ -325,6 +349,144 @@ background-color: var(--main-accent);
 color: var(--primary-text);
 font-weight: 700;
 }
+
+.inventory-management {
+margin-top: 2rem;
+}
+
+.management-links {
+list-style: none;
+padding: 0;
+margin: 1.5rem 0;
+display: flex;
+flex-wrap: wrap;
+gap: 1rem;
+}
+
+.btn-link {
+display: inline-block;
+padding: 0.75rem 1.5rem;
+background-color: var(--main-accent);
+color: var(--primary-text);
+font-weight: 600;
+border-radius: 999px;
+text-decoration: none;
+transition: opacity 0.2s ease;
+}
+
+.btn-link:hover {
+opacity: 0.8;
+}
+
+.form-wrapper {
+margin-top: 2rem;
+}
+
+.form-card {
+display: flex;
+flex-direction: column;
+gap: 0.85rem;
+background-color: #fff;
+border: 1px solid #e0e0e0;
+border-radius: 8px;
+padding: 1.5rem;
+box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.form-card input,
+.form-card select,
+.form-card textarea {
+width: 100%;
+padding: 0.75rem;
+border-radius: 6px;
+border: 1px solid #c7c7c7;
+font-size: 1rem;
+}
+
+.form-card input:focus,
+.form-card select:focus,
+.form-card textarea:focus {
+outline: 2px solid var(--main-accent);
+border-color: var(--main-accent);
+}
+
+.form-card small {
+font-size: 0.85rem;
+color: #4b4b4b;
+}
+
+.form-card button {
+margin-top: 0.5rem;
+padding: 0.85rem 1.25rem;
+font-size: 1rem;
+font-weight: 700;
+background-color: var(--main-accent);
+color: var(--primary-text);
+border: none;
+border-radius: 6px;
+cursor: pointer;
+transition: opacity 0.2s ease;
+}
+
+.form-card button:hover {
+opacity: 0.85;
+}
+
+.auth-wrapper {
+max-width: 640px;
+margin-left: auto;
+margin-right: auto;
+}
+
+.auth-form label {
+font-weight: 600;
+}
+
+.password-helper {
+margin-top: 0.35rem;
+margin-bottom: 0.35rem;
+padding: 0.5rem 0.75rem;
+background-color: #eef6ff;
+border-left: 4px solid var(--main-accent);
+border-radius: 0 6px 6px 0;
+color: #0b3d60;
+font-size: 0.9rem;
+line-height: 1.4;
+}
+
+.form-errors {
+background-color: #ffeeef;
+border: 1px solid #f29b9f;
+padding: 1rem;
+border-radius: 6px;
+margin-bottom: 1.25rem;
+}
+
+.form-errors ul {
+margin: 0.5rem 0 0;
+padding-left: 1.25rem;
+}
+
+input:required:invalid,
+input:focus:invalid,
+select:required:invalid,
+select:focus:invalid,
+textarea:required:invalid,
+textarea:focus:invalid {
+border-color: #f29b9f;
+background-color: #fff7f8;
+}
+
+input:required:valid,
+select:required:valid,
+textarea:required:valid {
+border-color: #7fd37b;
+background-color: #f5fff4;
+}
+
+.select-wrapper select {
+width: 100%;
+}
 /* END inventory styles */
 
 @media only screen and (min-width: 768px) {
@@ -405,6 +567,10 @@ font-size: large;
 .vehicle-detail {
 flex-direction: row;
 align-items: flex-start;
+}
+.form-card {
+max-width: 720px;
+margin: 0 auto;
 }
 
 .vehicle-media img {

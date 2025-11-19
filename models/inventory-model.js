@@ -249,6 +249,11 @@ const inventory = [
   },
 ];
 
+const nextClassificationId = () =>
+  classifications.reduce((max, classification) => Math.max(max, classification.classification_id), 0) + 1;
+
+const nextInventoryId = () => inventory.reduce((max, vehicle) => Math.max(max, vehicle.inv_id), 0) + 1;
+
 async function getClassifications() {
   return classifications;
 }
@@ -269,10 +274,58 @@ async function getInventoryById(invId) {
   return inventory.find((vehicle) => vehicle.inv_id === Number(invId));
 }
 
+async function createClassification(classification_name) {
+  const exists = classifications.find(
+    (classification) => classification.classification_name.toLowerCase() === classification_name.toLowerCase()
+  );
+
+  if (exists) {
+    throw new Error("That classification already exists.");
+  }
+
+  const newClassification = {
+    classification_id: nextClassificationId(),
+    classification_name,
+  };
+
+  classifications.push(newClassification);
+  return newClassification;
+}
+
+async function createVehicle(vehicleData) {
+  const classificationId = Number(vehicleData.classification_id);
+  const classificationExists = classifications.some(
+    (classification) => classification.classification_id === classificationId
+  );
+
+  if (!classificationExists) {
+    throw new Error("The selected classification does not exist.");
+  }
+
+  const newVehicle = {
+    inv_id: nextInventoryId(),
+    inv_make: vehicleData.inv_make,
+    inv_model: vehicleData.inv_model,
+    inv_year: Number(vehicleData.inv_year),
+    inv_description: vehicleData.inv_description,
+    inv_image: vehicleData.inv_image,
+    inv_thumbnail: vehicleData.inv_thumbnail,
+    inv_price: Number(vehicleData.inv_price),
+    inv_miles: Number(vehicleData.inv_miles),
+    inv_color: vehicleData.inv_color,
+    classification_id: classificationId,
+  };
+
+  inventory.push(newVehicle);
+  return newVehicle;
+}
+
 module.exports = {
   getClassifications,
   getClassificationById,
   getInventoryByClassificationId,
   getInventoryById,
+  createClassification,
+  createVehicle,
 };
 
