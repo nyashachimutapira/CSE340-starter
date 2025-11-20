@@ -1,0 +1,24 @@
+<% if (success && success.length) { %>
+  <div class="alert alert-success" role="status">
+    <% success.forEach((msg) => { %>
+      <p><%= msg %></p>
+    <% }) %>
+  </div>
+<% } %>
+
+<% if (notice && notice.length) { %>
+  <div class="alert alert-info" role="status">
+    <% notice.forEach((msg) => { %>
+      <p><%= msg %></p>
+    <% }) %>
+  </div>
+<% } %>
+
+<% if (error && error.length) { %>
+  <div class="alert alert-error" role="alert">
+    <% error.forEach((msg) => { %>
+      <p><%= msg %></p>
+    <% }) %>
+  </div>
+<% } %>
+

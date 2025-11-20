@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-  <%- include("../partials/head"); %>
+  <head>
+    <%- include("../partials/head"); %>
+  </head>
 
   <body>
     <div id="wrapper">
@@ -8,7 +10,7 @@
       <%- include("../partials/navigation"); %>
 
       <main>
-        <%- messages() %>
+        <%- include("../partials/messages"); %>
         <%- body %>
       </main>
 

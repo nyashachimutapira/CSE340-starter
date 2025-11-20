@@ -1,0 +1,50 @@
+<section class="form-wrapper auth-wrapper">
+  <h1>Account Login</h1>
+  <p>
+    Sign in to access your saved vehicles. Need an account?
+    <a href="/account/register">Create one here</a>.
+  </p>
+
+  <% if (errors && errors.length) { %>
+    <div class="form-errors" role="alert">
+      <p>Please fix the following:</p>
+      <ul>
+        <% errors.forEach((error) => { %>
+          <li><%= error.msg %></li>
+        <% }) %>
+      </ul>
+    </div>
+  <% } %>
+
+  <form class="form-card needs-validation auth-form" action="/account/login" method="post">
+    <label for="loginEmail">Email Address</label>
+    <input
+      type="email"
+      id="loginEmail"
+      name="account_email"
+      placeholder="name@example.com"
+      required
+      autocomplete="email"
+      value="<%= typeof account_email !== 'undefined' ? account_email : 'chimutapiran@gmail.com' %>"
+    >
+
+    <label for="loginPassword">Password</label>
+    <div class="password-helper" id="loginPasswordHelper">
+      Passwords must be at least 12 characters and contain at least 1 number, 1 capital letter, and 1 special character.
+    </div>
+    <input
+      type="password"
+      id="loginPassword"
+      name="account_password"
+      required
+      autocomplete="current-password"
+      pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{12,}$"
+      aria-describedby="loginPasswordHelper"
+      value="<%= typeof account_password !== 'undefined' ? account_password : '@Chimutapira2019' %>"
+    >
+
+    <button type="submit">Sign In</button>
+  </form>
+</section>
+
+
