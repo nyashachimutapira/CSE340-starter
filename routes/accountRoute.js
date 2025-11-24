@@ -16,6 +16,8 @@ router.get(
 
 router.post(
   "/login",
+  accountValidate.loginRules(),
+  accountValidate.checkLoginData,
   utilities.handleErrors(accountController.processLogin)
 );
 
@@ -24,6 +26,11 @@ router.post(
   accountValidate.registrationRules(),
   accountValidate.checkRegData,
   utilities.handleErrors(accountController.processRegistration)
+);
+
+router.get(
+  "/logout",
+  utilities.handleErrors(accountController.logout)
 );
 
 module.exports = router;

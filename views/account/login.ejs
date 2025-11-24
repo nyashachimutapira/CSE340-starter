@@ -25,7 +25,7 @@
       placeholder="name@example.com"
       required
       autocomplete="email"
-      value="<%= typeof account_email !== 'undefined' ? account_email : 'chimutapiran@gmail.com' %>"
+      value="<%= typeof account_email !== 'undefined' ? account_email : '' %>"
     >
 
     <label for="loginPassword">Password</label>
@@ -40,7 +40,6 @@
       autocomplete="current-password"
       pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{12,}$"
       aria-describedby="loginPasswordHelper"
-      value="<%= typeof account_password !== 'undefined' ? account_password : '@Chimutapira2019' %>"
     >
 
     <button type="submit">Sign In</button>

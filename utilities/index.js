@@ -1,4 +1,10 @@
+const jwt = require("jsonwebtoken");
 const invModel = require("../models/inventory-model");
+
+const JWT_SECRET = process.env.ACCESS_TOKEN_SECRET || "cse340_jwt_secret";
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "1h";
+const JWT_COOKIE_NAME = process.env.JWT_COOKIE_NAME || "jwt";
+const JWT_COOKIE_MAX_AGE = Number(process.env.JWT_COOKIE_MAX_AGE_MS) || 1000 * 60 * 60; // 1 hour
 
 const utilities = {};
 
@@ -141,6 +147,79 @@ utilities.handleErrors = function handleErrors(callback) {
   return function wrappedController(req, res, next) {
     Promise.resolve(callback(req, res, next)).catch(next);
   };
+};
+
+utilities.buildAuthPayload = function buildAuthPayload(account) {
+  if (!account) return null;
+  return {
+    account_id: account.account_id,
+    account_firstname: account.account_firstname,
+    account_lastname: account.account_lastname,
+    account_email: account.account_email,
+    account_type: account.account_type,
+  };
+};
+
+utilities.generateJWT = function generateJWT(payload, options = {}) {
+  return jwt.sign(payload, JWT_SECRET, {
+    expiresIn: options.expiresIn || JWT_EXPIRES_IN,
+  });
+};
+
+utilities.attachAuthCookie = function attachAuthCookie(res, token) {
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: JWT_COOKIE_MAX_AGE,
+  };
+
+  if (process.env.JWT_COOKIE_DOMAIN) {
+    cookieOptions.domain = process.env.JWT_COOKIE_DOMAIN;
+  }
+
+  res.cookie(JWT_COOKIE_NAME, token, cookieOptions);
+};
+
+utilities.clearAuthCookie = function clearAuthCookie(res) {
+  res.clearCookie(JWT_COOKIE_NAME, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+  });
+};
+
+utilities.checkJWTToken = function checkJWTToken(req, res, next) {
+  const token = req.cookies?.[JWT_COOKIE_NAME];
+
+  if (!token) {
+    res.locals.account = null;
+    res.locals.loggedIn = false;
+    return next();
+  }
+
+  try {
+    const accountData = jwt.verify(token, JWT_SECRET);
+    req.account = accountData;
+    res.locals.account = accountData;
+    res.locals.loggedIn = true;
+  } catch (error) {
+    console.error("Invalid JWT detected:", error.message);
+    utilities.clearAuthCookie(res);
+    res.locals.account = null;
+    res.locals.loggedIn = false;
+  }
+
+  next();
+};
+
+utilities.requireAuth = function requireAuth(req, res, next) {
+  if (!req.account) {
+    req.flash("notice", "Please log in to continue.");
+    return res.redirect("/account/login");
+  }
+
+  next();
 };
 
 module.exports = utilities;

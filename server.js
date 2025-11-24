@@ -9,8 +9,10 @@
 const express = require("express");
 const expressLayouts = require("express-ejs-layouts");
 const session = require("express-session");
+const cookieParser = require("cookie-parser");
 const flash = require("connect-flash");
 require("dotenv").config(); // no need to assign to a variable
+console.log("DB URL:", process.env.DATABASE_URL);
 const app = express();
 const staticRoutes = require("./routes/static");
 const inventoryRoute = require("./routes/inventoryRoute");
@@ -31,6 +33,7 @@ app.set("layout", "./layouts/layout"); // not at views root
  *************************/
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(staticRoutes);
 app.use(
   session({
@@ -46,6 +49,7 @@ app.use(
   })
 );
 app.use(flash());
+app.use(utilities.checkJWTToken);
 
 app.use(async (req, res, next) => {
   try {

@@ -53,12 +53,43 @@ validate.checkRegData = async (req, res, next) => {
 
   if (!errors.isEmpty()) {
     const nav = await utilities.getNav();
+    const errorMessages = errors.array();
     return res.render("account/register", {
       title: "Create Account",
       nav,
-      errors,
+      errors: errorMessages,
       account_firstname,
       account_lastname,
+      account_email,
+    });
+  }
+
+  next();
+};
+
+validate.loginRules = () => {
+  return [
+    body("account_email")
+      .trim()
+      .notEmpty()
+      .isEmail()
+      .normalizeEmail()
+      .withMessage("Please enter a valid email address."),
+    body("account_password").trim().notEmpty().withMessage("Please provide your password."),
+  ];
+};
+
+validate.checkLoginData = async (req, res, next) => {
+  const { account_email } = req.body;
+  let errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    const nav = await utilities.getNav();
+    const errorMessages = errors.array();
+    return res.render("account/login", {
+      title: "Account Login",
+      nav,
+      errors: errorMessages,
       account_email,
     });
   }
