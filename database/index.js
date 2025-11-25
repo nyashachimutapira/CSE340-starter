@@ -10,19 +10,30 @@ const connectionOptions = {};
 const appendSslMode = (url) => {
   try {
     const parsed = new URL(url);
+    // Fix incomplete Render hostnames (missing .oregon-postgres.render.com)
+    if (parsed.hostname && !parsed.hostname.includes(".") && parsed.hostname.startsWith("dpg-")) {
+      parsed.hostname = `${parsed.hostname}.oregon-postgres.render.com`;
+    }
     if (!parsed.searchParams.has("sslmode")) {
       parsed.searchParams.set("sslmode", "require");
     }
     return parsed.toString();
   } catch {
+    // If URL parsing fails, try to fix hostname manually
+    if (url.includes("@dpg-") && !url.includes(".oregon-postgres.render.com")) {
+      url = url.replace(/@(dpg-[a-z0-9]+)([^:])/, "@$1.oregon-postgres.render.com$2");
+    }
     return url.includes("sslmode=") ? url : `${url}?sslmode=require`;
   }
 };
 
 if (process.env.DATABASE_URL) {
-  connectionOptions.connectionString = appendSslMode(
-    process.env.DATABASE_URL
-  );
+  const originalUrl = process.env.DATABASE_URL;
+  const fixedUrl = appendSslMode(originalUrl);
+  if (originalUrl !== fixedUrl && process.env.NODE_ENV !== "production") {
+    console.log("Fixed DATABASE_URL hostname:", fixedUrl.replace(/:[^:@]+@/, ":****@"));
+  }
+  connectionOptions.connectionString = fixedUrl;
 } else {
   connectionOptions.host = process.env.DB_HOST;
   connectionOptions.port = process.env.DB_PORT;
