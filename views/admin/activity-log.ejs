@@ -1,0 +1,240 @@
+<div class="admin-activity-log">
+  <h1>Admin Activity Log</h1>
+  
+  <div class="activity-stats">
+    <p><strong>Total Activities:</strong> <%= activities.length %></p>
+    <p class="page-info">Page <%= currentPage %> | Items per page: <%= pageSize %></p>
+  </div>
+
+  <% if (activities && activities.length > 0) { %>
+    <div class="activity-table-container">
+      <table class="activity-table">
+        <thead>
+          <tr>
+            <th>Date & Time</th>
+            <th>Admin</th>
+            <th>Action</th>
+            <th>Target Type</th>
+            <th>Target ID</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% activities.forEach(activity => { %>
+            <tr>
+              <td class="date-cell">
+                <%= new Date(activity.created_at).toLocaleDateString() %>
+                <br>
+                <span class="time"><%= new Date(activity.created_at).toLocaleTimeString() %></span>
+              </td>
+              <td>
+                <strong><%= activity.account_firstname %> <%= activity.account_lastname %></strong>
+              </td>
+              <td>
+                <span class="action-badge"><%= activity.action_type %></span>
+              </td>
+              <td>
+                <%= activity.target_type || '-' %>
+              </td>
+              <td>
+                <%= activity.target_id || '-' %>
+              </td>
+              <td class="description-cell">
+                <%= activity.description || '-' %>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <% if (currentPage > 1) { %>
+        <a href="?page=<%= currentPage - 1 %>" class="btn btn-pagination">← Previous</a>
+      <% } %>
+      
+      <span class="page-number">Page <%= currentPage %></span>
+      
+      <% if (activities.length === pageSize) { %>
+        <a href="?page=<%= currentPage + 1 %>" class="btn btn-pagination">Next →</a>
+      <% } %>
+    </div>
+  <% } else { %>
+    <div class="no-data">
+      <p>No admin activities found.</p>
+    </div>
+  <% } %>
+
+  <div class="back-link">
+    <a href="/admin/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+  </div>
+</div>
+
+<style>
+.admin-activity-log {
+  padding: 20px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.admin-activity-log h1 {
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.activity-stats {
+  background-color: white;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.page-info {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 5px 0 0 0;
+}
+
+.activity-table-container {
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+}
+
+.activity-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.activity-table th {
+  background-color: #f8f9fa;
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #dee2e6;
+  white-space: nowrap;
+}
+
+.activity-table td {
+  padding: 12px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.activity-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.date-cell {
+  font-weight: 600;
+  color: #333;
+}
+
+.date-cell .time {
+  display: block;
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: normal;
+}
+
+.action-badge {
+  display: inline-block;
+  background-color: #007bff;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.description-cell {
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #666;
+}
+
+.no-data {
+  background-color: white;
+  padding: 30px;
+  border-radius: 5px;
+  text-align: center;
+  color: #999;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+  padding: 20px;
+  background-color: white;
+  border-radius: 5px;
+}
+
+.page-number {
+  font-weight: 600;
+  color: #333;
+  min-width: 80px;
+  text-align: center;
+}
+
+.btn-pagination {
+  padding: 8px 15px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 3px;
+  font-weight: 600;
+  transition: background-color 0.3s;
+}
+
+.btn-pagination:hover {
+  background-color: #0056b3;
+}
+
+.back-link {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background-color 0.3s;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+@media (max-width: 768px) {
+  .activity-table {
+    font-size: 0.9rem;
+  }
+  
+  .activity-table th,
+  .activity-table td {
+    padding: 8px;
+  }
+  
+  .description-cell {
+    max-width: 150px;
+  }
+}
+</style>

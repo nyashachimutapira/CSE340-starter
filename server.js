@@ -20,7 +20,10 @@ const app = express();
 const staticRoutes = require("./routes/static");
 const inventoryRoute = require("./routes/inventoryRoute");
 const accountRoute = require("./routes/accountRoute");
+const adminRoute = require("./routes/adminRoute");
 const errorRoute = require("./routes/errorRoute");
+const cartRoute = require("./routes/cartRoute");
+const wishlistRoute = require("./routes/wishlistRoute");
 const utilities = require("./utilities");
 const pool = require("./database/");
 
@@ -77,7 +80,10 @@ app.use(async (req, res, next) => {
  *************************/
 app.use("/inv", inventoryRoute);
 app.use("/account", accountRoute);
+app.use("/admin", adminRoute);
 app.use("/error", errorRoute);
+app.use("/cart", cartRoute);
+app.use("/wishlist", wishlistRoute);
 
 // Index route
 app.get(

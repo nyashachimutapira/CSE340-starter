@@ -1,0 +1,255 @@
+<div class="profile-container">
+  <div class="profile-header">
+    <h1><%= account.account_firstname %> <%= account.account_lastname %></h1>
+    <p class="account-email"><%= account.account_email %></p>
+    <div class="account-type-badge">
+      <span class="badge badge-<%= account.account_type.toLowerCase() %>">
+        <%= account.account_type %>
+      </span>
+    </div>
+  </div>
+
+  <% if (profile && profile.profile_picture) { %>
+    <div class="profile-picture-section">
+      <img src="<%= profile.profile_picture %>" alt="<%= account.account_firstname %>'s profile picture" class="profile-picture">
+    </div>
+  <% } %>
+
+  <div class="profile-content">
+    <div class="profile-section">
+      <h2>Profile Information</h2>
+      <table class="profile-table">
+        <tr>
+          <td class="label">Name:</td>
+          <td><%= account.account_firstname %> <%= account.account_lastname %></td>
+        </tr>
+        <tr>
+          <td class="label">Email:</td>
+          <td><%= account.account_email %></td>
+        </tr>
+        <tr>
+          <td class="label">Account Type:</td>
+          <td><span class="badge badge-<%= account.account_type.toLowerCase() %>"><%= account.account_type %></span></td>
+        </tr>
+        <tr>
+          <td class="label">Member Since:</td>
+          <td><%= new Date(account.created_at).toLocaleDateString() %></td>
+        </tr>
+      </table>
+    </div>
+
+    <% if (profile) { %>
+      <div class="profile-section">
+        <h2>Additional Information</h2>
+        
+        <% if (profile.bio) { %>
+          <div class="profile-item">
+            <h3>Bio</h3>
+            <p><%= profile.bio %></p>
+          </div>
+        <% } else { %>
+          <div class="profile-item empty">
+            <p>No bio added yet</p>
+          </div>
+        <% } %>
+
+        <% if (profile.phone_number) { %>
+          <div class="profile-item">
+            <h3>Phone</h3>
+            <p><%= profile.phone_number %></p>
+          </div>
+        <% } else { %>
+          <div class="profile-item empty">
+            <p>No phone number provided</p>
+          </div>
+        <% } %>
+
+        <% if (profile.address) { %>
+          <div class="profile-item">
+            <h3>Address</h3>
+            <p><%= profile.address %></p>
+          </div>
+        <% } else { %>
+          <div class="profile-item empty">
+            <p>No address provided</p>
+          </div>
+        <% } %>
+
+        <p class="profile-updated">Last updated: <%= new Date(profile.updated_at).toLocaleDateString() %></p>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="profile-actions">
+    <a href="/account/profile/edit" class="btn btn-primary">Edit Profile</a>
+    <a href="/account/" class="btn btn-secondary">Back to Account</a>
+  </div>
+</div>
+
+<style>
+.profile-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.profile-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #ddd;
+}
+
+.profile-header h1 {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.account-email {
+  color: #666;
+  margin: 5px 0;
+}
+
+.account-type-badge {
+  margin-top: 10px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.badge-admin {
+  background-color: #dc3545;
+  color: white;
+}
+
+.badge-employee {
+  background-color: #007bff;
+  color: white;
+}
+
+.badge-client {
+  background-color: #6c757d;
+  color: white;
+}
+
+.profile-picture-section {
+  text-align: center;
+  margin: 30px 0;
+}
+
+.profile-picture {
+  max-width: 200px;
+  width: 100%;
+  border-radius: 50%;
+  border: 3px solid #007bff;
+  object-fit: cover;
+}
+
+.profile-content {
+  margin: 30px 0;
+}
+
+.profile-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+}
+
+.profile-section h2 {
+  margin-top: 0;
+  color: #333;
+  font-size: 1.25rem;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 10px;
+}
+
+.profile-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.profile-table tr {
+  border-bottom: 1px solid #ddd;
+}
+
+.profile-table td {
+  padding: 10px 0;
+}
+
+.profile-table .label {
+  font-weight: 600;
+  width: 30%;
+  color: #555;
+}
+
+.profile-item {
+  margin-bottom: 15px;
+  padding: 10px 0;
+}
+
+.profile-item h3 {
+  margin: 0 0 5px 0;
+  font-size: 0.95rem;
+  color: #555;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.profile-item p {
+  margin: 0;
+  color: #333;
+}
+
+.profile-item.empty p {
+  color: #999;
+  font-style: italic;
+}
+
+.profile-updated {
+  font-size: 0.85rem;
+  color: #999;
+  margin-top: 15px;
+  border-top: 1px solid #ddd;
+  padding-top: 15px;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background-color 0.3s;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+</style>

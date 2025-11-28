@@ -105,7 +105,7 @@ inventoryController.buildVehicleDetail = async function buildVehicleDetail(req, 
   }
 
   const nav = await utilities.getNav(vehicle.classification_id);
-  const detail = utilities.buildVehicleDetail(vehicle);
+  const detail = utilities.buildVehicleDetail(vehicle, req.account);
   const title = `${vehicle.inv_year} ${vehicle.inv_make} ${vehicle.inv_model}`;
 
   res.render("inventory/detail", {

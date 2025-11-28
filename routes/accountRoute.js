@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const accountController = require("../controllers/accountController");
+const profileController = require("../controllers/profileController");
 const utilities = require("../utilities");
 const accountValidate = require("../utilities/account-validation");
 
@@ -59,6 +60,25 @@ router.post(
 router.get(
   "/logout",
   utilities.handleErrors(accountController.logout)
+);
+
+// Profile routes
+router.get(
+  "/profile",
+  utilities.requireAuth,
+  utilities.handleErrors(profileController.buildViewProfile)
+);
+
+router.get(
+  "/profile/edit",
+  utilities.requireAuth,
+  utilities.handleErrors(profileController.buildEditProfile)
+);
+
+router.post(
+  "/profile/update",
+  utilities.requireAuth,
+  utilities.handleErrors(profileController.updateProfile)
 );
 
 module.exports = router;

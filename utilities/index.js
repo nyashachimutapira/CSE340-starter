@@ -87,9 +87,10 @@ utilities.buildClassificationGrid = function buildClassificationGrid(data = []) 
 /**
  * Build the HTML for an individual vehicle detail view.
  * @param {object} vehicle
+ * @param {object|null} userAccount - The logged-in user account or null
  * @returns {string}
  */
-utilities.buildVehicleDetail = function buildVehicleDetail(vehicle) {
+utilities.buildVehicleDetail = function buildVehicleDetail(vehicle, userAccount = null) {
   if (!vehicle) {
     return "";
   }
@@ -97,6 +98,22 @@ utilities.buildVehicleDetail = function buildVehicleDetail(vehicle) {
   const title = `${vehicle.inv_year} ${vehicle.inv_make} ${vehicle.inv_model}`;
   const price = utilities.formatCurrency(vehicle.inv_price);
   const miles = utilities.formatNumber(vehicle.inv_miles);
+
+  let actionButtons = '';
+  if (userAccount) {
+    actionButtons = `
+      <div class="vehicle-actions">
+        <button class="btn btn-primary add-to-cart-btn" data-inv-id="${vehicle.inv_id}">Add to Cart</button>
+        <button class="btn btn-secondary add-to-wishlist-btn" data-inv-id="${vehicle.inv_id}">Add to Wishlist</button>
+      </div>
+    `;
+  } else {
+    actionButtons = `
+      <div class="vehicle-actions">
+        <p class="login-prompt"><a href="/account/login">Log in</a> to add items to cart or wishlist</p>
+      </div>
+    `;
+  }
 
   return `
     <section class="vehicle-detail">
@@ -111,6 +128,7 @@ utilities.buildVehicleDetail = function buildVehicleDetail(vehicle) {
         <p><strong>Mileage:</strong> ${miles} miles</p>
         <p><strong>Color:</strong> ${vehicle.inv_color}</p>
         <p class="vehicle-description">${vehicle.inv_description}</p>
+        ${actionButtons}
       </div>
     </section>
   `;

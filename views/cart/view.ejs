@@ -1,0 +1,240 @@
+<div class="cart-container">
+  <h1>Shopping Cart</h1>
+
+  <% if (notices && notices.length > 0) { %>
+    <div class="alerts">
+      <% notices.forEach(notice => { %>
+        <div class="alert alert-info"><%= notice %></div>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <% if (errors && errors.length > 0) { %>
+    <div class="alerts">
+      <% errors.forEach(error => { %>
+        <div class="alert alert-danger"><%= error.msg %></div>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <% if (success && success.length > 0) { %>
+    <div class="alerts">
+      <% success.forEach(msg => { %>
+        <div class="alert alert-success"><%= msg %></div>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <% if (cartItems && cartItems.length > 0) { %>
+    <div class="cart-summary">
+      <p>Total Items: <strong><%= itemCount %></strong></p>
+      <p>Total Price: <strong>$<%= total %></strong></p>
+    </div>
+
+    <div class="cart-items">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Subtotal</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% cartItems.forEach(item => { %>
+            <tr data-cart-id="<%= item.cart_id %>">
+              <td>
+                <a href="/inv/detail/<%= item.inv_id %>">
+                  <img src="<%= item.inv_thumbnail %>" alt="<%= item.inv_year %> <%= item.inv_make %> <%= item.inv_model %>" class="cart-thumbnail">
+                  <%= item.inv_year %> <%= item.inv_make %> <%= item.inv_model %>
+                </a>
+              </td>
+              <td>$<%= parseFloat(item.inv_price).toFixed(2) %></td>
+              <td>
+                <input type="number" class="qty-input" value="<%= item.quantity %>" min="1" data-cart-id="<%= item.cart_id %>">
+              </td>
+              <td>$<%= (item.inv_price * item.quantity).toFixed(2) %></td>
+              <td>
+                <button class="btn btn-danger btn-sm remove-item" data-cart-id="<%= item.cart_id %>">Remove</button>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cart-actions">
+      <button class="btn btn-warning" id="clear-cart">Clear Cart</button>
+      <a href="/inv" class="btn btn-secondary">Continue Shopping</a>
+      <button class="btn btn-primary" id="checkout-btn">Proceed to Checkout</button>
+    </div>
+  <% } else { %>
+    <div class="alert alert-info">
+      <p>Your cart is empty.</p>
+      <a href="/inv" class="btn btn-primary">Continue Shopping</a>
+    </div>
+  <% } %>
+</div>
+
+<style>
+  .cart-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .cart-summary {
+    background: #f0f0f0;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+  }
+
+  .cart-thumbnail {
+    max-width: 100px;
+    height: auto;
+    margin-right: 10px;
+  }
+
+  .qty-input {
+    width: 60px;
+    padding: 5px;
+  }
+
+  .cart-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+  }
+
+  .alerts {
+    margin-bottom: 20px;
+  }
+
+  .alert {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+  }
+
+  .alert-info {
+    background: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+  }
+
+  .alert-success {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+  }
+
+  .alert-danger {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+  }
+</style>
+
+<script>
+  // Update quantity
+  document.querySelectorAll('.qty-input').forEach(input => {
+    input.addEventListener('change', async function() {
+      const cartId = this.dataset.cartId;
+      const quantity = parseInt(this.value);
+
+      if (quantity <= 0) {
+        alert('Quantity must be greater than 0');
+        location.reload();
+        return;
+      }
+
+      try {
+        const response = await fetch('/cart/update-quantity', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ cartId, quantity })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          location.reload();
+        } else {
+          alert(data.message || 'Error updating quantity');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error updating quantity');
+      }
+    });
+  });
+
+  // Remove item
+  document.querySelectorAll('.remove-item').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      const cartId = this.dataset.cartId;
+
+      if (confirm('Are you sure you want to remove this item?')) {
+        try {
+          const response = await fetch('/cart/remove', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ cartId })
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            location.reload();
+          } else {
+            alert(data.message || 'Error removing item');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error removing item');
+        }
+      }
+    });
+  });
+
+  // Clear cart
+  const clearBtn = document.getElementById('clear-cart');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', async function() {
+      if (confirm('Are you sure you want to clear your entire cart?')) {
+        try {
+          const response = await fetch('/cart/clear', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            location.reload();
+          } else {
+            alert(data.message || 'Error clearing cart');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error clearing cart');
+        }
+      }
+    });
+  }
+
+  // Checkout button
+  const checkoutBtn = document.getElementById('checkout-btn');
+  if (checkoutBtn) {
+    checkoutBtn.addEventListener('click', function() {
+      alert('Checkout functionality coming soon!');
+      // You can implement actual checkout later
+    });
+  }
+</script>

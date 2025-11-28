@@ -1,0 +1,217 @@
+<div class="edit-profile-container">
+  <h1>Edit Your Profile</h1>
+
+  <% if (errors && errors.length) { %>
+    <div class="alert alert-danger" role="alert">
+      <h3>Please Fix These Errors:</h3>
+      <ul>
+        <% errors.forEach(error => { %>
+          <li><%= error.msg %></li>
+        <% }); %>
+      </ul>
+    </div>
+  <% } %>
+
+  <form method="POST" action="/account/profile/update" class="profile-form">
+    <div class="form-group">
+      <label for="account_firstname">First Name (View Only):</label>
+      <input type="text" id="account_firstname" value="<%= account.account_firstname %>" disabled class="form-control" />
+    </div>
+
+    <div class="form-group">
+      <label for="account_lastname">Last Name (View Only):</label>
+      <input type="text" id="account_lastname" value="<%= account.account_lastname %>" disabled class="form-control" />
+    </div>
+
+    <div class="form-group">
+      <label for="account_email">Email (View Only):</label>
+      <input type="email" id="account_email" value="<%= account.account_email %>" disabled class="form-control" />
+    </div>
+
+    <div class="form-group">
+      <label for="bio">Bio:</label>
+      <textarea 
+        id="bio" 
+        name="bio" 
+        class="form-control" 
+        rows="4" 
+        placeholder="Tell us about yourself"
+        maxlength="500"
+      ><%= profile && profile.bio ? profile.bio : '' %></textarea>
+      <small class="form-text">Maximum 500 characters</small>
+    </div>
+
+    <div class="form-group">
+      <label for="phone_number">Phone Number:</label>
+      <input 
+        type="tel" 
+        id="phone_number" 
+        name="phone_number" 
+        class="form-control" 
+        placeholder="(123) 456-7890"
+        value="<%= profile && profile.phone_number ? profile.phone_number : '' %>"
+        maxlength="20"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="address">Address:</label>
+      <input 
+        type="text" 
+        id="address" 
+        name="address" 
+        class="form-control" 
+        placeholder="123 Main St, City, State 12345"
+        value="<%= profile && profile.address ? profile.address : '' %>"
+        maxlength="255"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="profile_picture">Profile Picture URL:</label>
+      <input 
+        type="url" 
+        id="profile_picture" 
+        name="profile_picture" 
+        class="form-control" 
+        placeholder="https://example.com/profile.jpg"
+        value="<%= profile && profile.profile_picture ? profile.profile_picture : '' %>"
+        maxlength="500"
+      />
+      <small class="form-text">Provide a full URL to your profile picture</small>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Save Changes</button>
+      <a href="/account/profile" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<style>
+.edit-profile-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.edit-profile-container h1 {
+  color: #333;
+  margin-bottom: 30px;
+}
+
+.alert {
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+
+.alert h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.alert ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.profile-form {
+  background-color: #f8f9fa;
+  padding: 25px;
+  border-radius: 5px;
+  border: 1px solid #dee2e6;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.form-control:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+  color: #666;
+}
+
+textarea.form-control {
+  resize: vertical;
+}
+
+.form-text {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 30px;
+  justify-content: center;
+}
+
+.btn {
+  display: inline-block;
+  padding: 10px 25px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 1rem;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+.btn-secondary {
+  text-decoration: none;
+}
+</style>

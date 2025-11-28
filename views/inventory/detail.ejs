@@ -3,3 +3,113 @@
   <%- detail %>
 </div>
 
+<style>
+  .vehicle-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .btn-primary {
+    background: #007bff;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #0056b3;
+  }
+
+  .btn-secondary {
+    background: #6c757d;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background: #5a6268;
+  }
+
+  .login-prompt {
+    margin-top: 20px;
+    padding: 10px;
+    background: #f0f0f0;
+    border-radius: 4px;
+  }
+
+  .login-prompt a {
+    color: #007bff;
+    text-decoration: none;
+  }
+
+  .login-prompt a:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<script>
+  // Add to cart
+  document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      const invId = this.dataset.invId;
+
+      try {
+        const response = await fetch('/cart/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ invId, quantity: 1 })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          alert('Item added to cart!');
+        } else if (data.redirect) {
+          window.location.href = data.redirect;
+        } else {
+          alert(data.message || 'Error adding to cart');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error adding to cart');
+      }
+    });
+  });
+
+  // Add to wishlist
+  document.querySelectorAll('.add-to-wishlist-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      const invId = this.dataset.invId;
+
+      try {
+        const response = await fetch('/wishlist/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ invId })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          alert('Item added to wishlist!');
+        } else if (data.redirect) {
+          window.location.href = data.redirect;
+        } else {
+          alert(data.message || 'Error adding to wishlist');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error adding to wishlist');
+      }
+    });
+  });
+</script>
+

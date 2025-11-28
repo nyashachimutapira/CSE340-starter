@@ -1,0 +1,277 @@
+<div class="wishlist-container">
+  <h1>My Wishlist</h1>
+
+  <% if (notices && notices.length > 0) { %>
+    <div class="alerts">
+      <% notices.forEach(notice => { %>
+        <div class="alert alert-info"><%= notice %></div>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <% if (errors && errors.length > 0) { %>
+    <div class="alerts">
+      <% errors.forEach(error => { %>
+        <div class="alert alert-danger"><%= error.msg %></div>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <% if (success && success.length > 0) { %>
+    <div class="alerts">
+      <% success.forEach(msg => { %>
+        <div class="alert alert-success"><%= msg %></div>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <% if (wishlistItems && wishlistItems.length > 0) { %>
+    <div class="wishlist-summary">
+      <p>Total Items: <strong><%= itemCount %></strong></p>
+    </div>
+
+    <div class="wishlist-grid">
+      <% wishlistItems.forEach(item => { %>
+        <div class="wishlist-item" data-wishlist-id="<%= item.wishlist_id %>">
+          <div class="item-image">
+            <a href="/inv/detail/<%= item.inv_id %>">
+              <img src="<%= item.inv_image %>" alt="<%= item.inv_year %> <%= item.inv_make %> <%= item.inv_model %>">
+            </a>
+          </div>
+          <div class="item-details">
+            <h3>
+              <a href="/inv/detail/<%= item.inv_id %>">
+                <%= item.inv_year %> <%= item.inv_make %> <%= item.inv_model %>
+              </a>
+            </h3>
+            <p class="price">Price: <strong>$<%= parseFloat(item.inv_price).toFixed(2) %></strong></p>
+            <div class="item-actions">
+              <button class="btn btn-success btn-sm add-to-cart" data-inv-id="<%= item.inv_id %>">
+                Add to Cart
+              </button>
+              <button class="btn btn-danger btn-sm remove-item" data-wishlist-id="<%= item.wishlist_id %>">
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  <% } else { %>
+    <div class="alert alert-info">
+      <p>Your wishlist is empty.</p>
+      <a href="/inv" class="btn btn-primary">Browse Vehicles</a>
+    </div>
+  <% } %>
+</div>
+
+<style>
+  .wishlist-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .wishlist-summary {
+    background: #f0f0f0;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+  }
+
+  .wishlist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  .wishlist-item {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: box-shadow 0.3s;
+  }
+
+  .wishlist-item:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  }
+
+  .item-image {
+    height: 200px;
+    overflow: hidden;
+    background: #f5f5f5;
+  }
+
+  .item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .item-details {
+    padding: 15px;
+  }
+
+  .item-details h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+  }
+
+  .item-details a {
+    color: #007bff;
+    text-decoration: none;
+  }
+
+  .item-details a:hover {
+    text-decoration: underline;
+  }
+
+  .price {
+    margin: 10px 0;
+    font-size: 18px;
+  }
+
+  .item-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .item-actions .btn {
+    flex: 1;
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn-success {
+    background: #28a745;
+    color: white;
+  }
+
+  .btn-success:hover {
+    background: #218838;
+  }
+
+  .btn-danger {
+    background: #dc3545;
+    color: white;
+  }
+
+  .btn-danger:hover {
+    background: #c82333;
+  }
+
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .btn-primary {
+    background: #007bff;
+    color: white;
+    padding: 10px 20px;
+  }
+
+  .btn-primary:hover {
+    background: #0056b3;
+  }
+
+  .alerts {
+    margin-bottom: 20px;
+  }
+
+  .alert {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+  }
+
+  .alert-info {
+    background: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+  }
+
+  .alert-success {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+  }
+
+  .alert-danger {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+  }
+</style>
+
+<script>
+  // Add to cart from wishlist
+  document.querySelectorAll('.add-to-cart').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      const invId = this.dataset.invId;
+
+      try {
+        const response = await fetch('/cart/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ invId, quantity: 1 })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          alert('Item added to cart!');
+          // Optionally remove from wishlist or just show message
+        } else {
+          alert(data.message || 'Error adding to cart');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error adding to cart');
+      }
+    });
+  });
+
+  // Remove from wishlist
+  document.querySelectorAll('.remove-item').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      const wishlistId = this.dataset.wishlistId;
+
+      if (confirm('Are you sure you want to remove this item from your wishlist?')) {
+        try {
+          const response = await fetch('/wishlist/remove', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ wishlistId })
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            location.reload();
+          } else {
+            alert(data.message || 'Error removing item');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error removing item');
+        }
+      }
+    });
+  });
+</script>
