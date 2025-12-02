@@ -1,0 +1,166 @@
+<div class="order-history-container">
+  <h1><%= title %></h1>
+
+  <% if (orders && orders.length > 0) { %>
+    <div class="orders-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Date</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% orders.forEach(order => { %>
+            <tr>
+              <td>#<%= order.order_id %></td>
+              <td><%= new Date(order.order_date).toLocaleDateString('en-US') %></td>
+              <td><%= order.item_count %></td>
+              <td>$<%= parseFloat(order.total_amount).toLocaleString('en-US', {minimumFractionDigits: 2}) %></td>
+              <td><span class="status <%= order.status %>"><%= order.status %></span></td>
+              <td>
+                <a href="/order/confirmation/<%= order.order_id %>" class="btn btn-sm">View</a>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <div class="no-orders">
+      <p>You haven't placed any orders yet.</p>
+      <a href="/" class="btn btn-primary">Start Shopping</a>
+    </div>
+  <% } %>
+</div>
+
+<style>
+  .order-history-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .order-history-container h1 {
+    margin-bottom: 30px;
+  }
+
+  .orders-table {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  table thead {
+    background: #f5f5f5;
+    border-bottom: 2px solid #ddd;
+  }
+
+  table th, table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+
+  table th {
+    font-weight: bold;
+    color: #333;
+    text-transform: uppercase;
+    font-size: 12px;
+  }
+
+  table tbody tr:hover {
+    background: #f9f9f9;
+  }
+
+  .status {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+
+  .status.pending {
+    background: #fff3cd;
+    color: #856404;
+  }
+
+  .status.processing {
+    background: #d1ecf1;
+    color: #0c5460;
+  }
+
+  .status.shipped {
+    background: #cfe2ff;
+    color: #084298;
+  }
+
+  .status.delivered {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  .btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn-sm {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .btn-primary {
+    background: #007bff;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #0056b3;
+  }
+
+  .no-orders {
+    text-align: center;
+    padding: 60px 20px;
+    background: #f9f9f9;
+    border-radius: 5px;
+  }
+
+  .no-orders p {
+    color: #666;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 768px) {
+    table {
+      font-size: 12px;
+    }
+
+    table th, table td {
+      padding: 10px;
+    }
+
+    .btn-sm {
+      padding: 4px 8px;
+      font-size: 10px;
+    }
+  }
+</style>

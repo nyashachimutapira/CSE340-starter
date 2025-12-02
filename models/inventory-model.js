@@ -67,6 +67,102 @@ async function createClassification(classification_name) {
   }
 }
 
+async function searchInventory(filters = {}) {
+  let sql = `
+    SELECT inv_id, inv_make, inv_model, inv_year, inv_description, inv_image,
+           inv_thumbnail, inv_price, inv_miles, inv_color, classification_id
+    FROM public.inventory
+    WHERE 1=1
+  `;
+  
+  const params = [];
+  let paramCount = 1;
+
+  // Search by keyword (make, model, color, description)
+  if (filters.keyword && filters.keyword.trim()) {
+    const keyword = `%${filters.keyword.trim()}%`;
+    sql += ` AND (LOWER(inv_make) LIKE LOWER($${paramCount}) 
+             OR LOWER(inv_model) LIKE LOWER($${paramCount})
+             OR LOWER(inv_color) LIKE LOWER($${paramCount})
+             OR LOWER(inv_description) LIKE LOWER($${paramCount}))`;
+    params.push(keyword);
+    paramCount++;
+  }
+
+  // Filter by classification
+  if (filters.classification && Number(filters.classification) > 0) {
+    sql += ` AND classification_id = $${paramCount}`;
+    params.push(Number(filters.classification));
+    paramCount++;
+  }
+
+  // Filter by year
+  if (filters.year && Number(filters.year) > 0) {
+    sql += ` AND inv_year = $${paramCount}`;
+    params.push(String(filters.year).padStart(4, '0'));
+    paramCount++;
+  }
+
+  // Filter by make
+  if (filters.make && filters.make.trim()) {
+    sql += ` AND LOWER(inv_make) = LOWER($${paramCount})`;
+    params.push(filters.make.trim());
+    paramCount++;
+  }
+
+  // Filter by color
+  if (filters.color && filters.color.trim()) {
+    sql += ` AND LOWER(inv_color) = LOWER($${paramCount})`;
+    params.push(filters.color.trim());
+    paramCount++;
+  }
+
+  // Price range filter
+  if (filters.minPrice && Number(filters.minPrice) >= 0) {
+    sql += ` AND inv_price >= $${paramCount}`;
+    params.push(Number(filters.minPrice));
+    paramCount++;
+  }
+
+  if (filters.maxPrice && Number(filters.maxPrice) > 0) {
+    sql += ` AND inv_price <= $${paramCount}`;
+    params.push(Number(filters.maxPrice));
+    paramCount++;
+  }
+
+  // Miles range filter
+  if (filters.maxMiles && Number(filters.maxMiles) >= 0) {
+    sql += ` AND inv_miles <= $${paramCount}`;
+    params.push(Number(filters.maxMiles));
+    paramCount++;
+  }
+
+  // Sorting
+  const sortBy = filters.sortBy || 'make';
+  switch (sortBy) {
+    case 'price_low':
+      sql += ` ORDER BY inv_price ASC`;
+      break;
+    case 'price_high':
+      sql += ` ORDER BY inv_price DESC`;
+      break;
+    case 'year_new':
+      sql += ` ORDER BY inv_year DESC`;
+      break;
+    case 'year_old':
+      sql += ` ORDER BY inv_year ASC`;
+      break;
+    case 'miles_low':
+      sql += ` ORDER BY inv_miles ASC`;
+      break;
+    default:
+      sql += ` ORDER BY inv_make, inv_model`;
+  }
+
+  const result = await pool.query(sql, params);
+  return result.rows;
+}
+
 async function createVehicle(vehicleData) {
   const sql = `
     INSERT INTO public.inventory
@@ -112,6 +208,7 @@ module.exports = {
   getClassificationById,
   getInventoryByClassificationId,
   getInventoryById,
+  searchInventory,
   createClassification,
   createVehicle,
 };

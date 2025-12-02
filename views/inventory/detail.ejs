@@ -3,6 +3,55 @@
   <%- detail %>
 </div>
 
+<!-- Favorite toggle -->
+<div style="margin-top:12px;">
+  <button id="favorite-toggle" class="favorite-btn" aria-pressed="false" aria-label="Add to favorites">
+    <span class="heart">♡</span>
+  </button>
+  <span id="favorite-status" style="margin-left:8px"></span>
+</div>
+
+<!-- Embedded recent reviews -->
+<section id="embedded-reviews" style="margin-top:20px;">
+  <h2>Recent Reviews</h2>
+  <div id="recent-reviews">
+    <% if (typeof reviews !== 'undefined' && reviews && reviews.length) { %>
+      <% reviews.slice(0,3).forEach(function(r) { %>
+        <article class="review">
+          <header>
+            <strong><%= r.account_firstname %> <%= r.account_lastname %></strong>
+            <span class="meta"> — Rated: <%= r.rating %></span>
+          </header>
+          <p><%= r.review_text || '' %></p>
+        </article>
+      <% }) %>
+      <p><a href="/reviews/item/<%= inv_id %>">View all reviews</a></p>
+    <% } else { %>
+      <p class="notice">No reviews yet. <a href="/reviews/add/<%= inv_id %>">Be the first</a>.</p>
+    <% } %>
+  </div>
+</section>
+
+<!-- Review actions: links to add/view reviews for this item -->
+<div class="review-actions" style="margin-top:16px;">
+  <a id="add-review-link" href="#" class="btn btn-primary">Add Review</a>
+  <a id="view-reviews-link" href="#" class="btn btn-secondary">View Reviews</a>
+</div>
+
+<!-- Toast container (ARIA live region) -->
+<div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+<!-- Rating display and user rating widget -->
+<div id="rating-block" style="margin-top:12px;">
+  <div id="avg-rating">Average rating: <strong id="avg-value">...</strong> (<span id="rating-count">0</span> ratings)</div>
+  <div id="your-rating" style="margin-top:8px;">
+    <span>Your rating: </span>
+    <span id="user-stars">
+      <!-- Stars will be rendered here -->
+    </span>
+  </div>
+</div>
+
 <style>
   .vehicle-actions {
     margin-top: 20px;
@@ -51,13 +100,197 @@
   .login-prompt a:hover {
     text-decoration: underline;
   }
+
+  /* Favorite heart styles */
+  .favorite-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid #ccc;
+    color: #c00;
+  }
+
+  .favorite-btn[aria-pressed="true"] {
+    background: #ffe6e6;
+    border-color: #c00;
+  }
+
+  .favorite-btn .heart {
+    font-size: 18px;
+    line-height: 1;
+  }
+  /* Focus outline for keyboard users */
+  .btn:focus, .favorite-btn:focus, .add-to-cart-btn:focus, .add-to-wishlist-btn:focus, .remove-item:focus {
+    outline: 3px solid #0056b3;
+    outline-offset: 2px;
+  }
+
+  /* Toast styles */
+  #toast-container { position: fixed; top: 16px; right: 16px; z-index: 1050; }
+  .toast-item {
+    min-width: 220px;
+    max-width: 360px;
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .toast-item.success { border-color: #c3e6cb; background: #d4edda; }
+  .toast-item.error { border-color: #f5c6cb; background: #f8d7da; }
+  .toast-message { flex: 1; padding-right: 8px; }
+  .toast-close { background: transparent; border: none; cursor: pointer; font-size: 16px; }
 </style>
 
 <script>
-  // Add to cart
+  // Setup review links using server-provided inv_id when available
+  (function setupReviewLinks() {
+    try {
+      let invId = typeof inv_id !== 'undefined' ? Number(inv_id) : null;
+
+      if (!invId) {
+        const el = document.querySelector('.add-to-cart-btn') || document.querySelector('.add-to-wishlist-btn');
+        if (el && el.dataset && el.dataset.invId) invId = Number(el.dataset.invId);
+      }
+
+      const addLink = document.getElementById('add-review-link');
+      const viewLink = document.getElementById('view-reviews-link');
+
+      if (invId && addLink && viewLink) {
+        addLink.href = `/reviews/add/${invId}`;
+        viewLink.href = `/reviews/item/${invId}`;
+      } else {
+        // Hide links if we can't determine inv id
+        if (addLink) addLink.style.display = 'none';
+        if (viewLink) viewLink.style.display = 'none';
+      }
+    } catch (e) {
+      console.error('Error setting up review links', e);
+    }
+  })();
+
+  // Favorite toggle handler
+  (async function setupFavoriteToggle() {
+    try {
+      const favBtn = document.getElementById('favorite-toggle');
+      const favStatus = document.getElementById('favorite-status');
+      if (!favBtn) return;
+      const invId = typeof inv_id !== 'undefined' ? Number(inv_id) : null;
+      if (!invId) { favBtn.style.display = 'none'; return; }
+
+      const heartEl = favBtn.querySelector('.heart');
+
+      // Load initial favorite status
+      try {
+        const statusResp = await fetch(`/favorites/status/${invId}`);
+        if (statusResp.ok) {
+          const statusData = await statusResp.json();
+          const isFav = statusData && statusData.favorited;
+          favBtn.setAttribute('aria-pressed', isFav ? 'true' : 'false');
+          heartEl.textContent = isFav ? '♥' : '♡';
+          favStatus.textContent = isFav ? 'Favorited' : 'Not favorited';
+        }
+      } catch (e) {
+        // ignore — show neutral state
+        console.error('Failed to load favorite status', e);
+      }
+
+      favBtn.addEventListener('click', async () => {
+            // optimistic toggle: update UI immediately
+            const wasPressed = favBtn.getAttribute('aria-pressed') === 'true';
+            const newPressed = !wasPressed;
+            favBtn.setAttribute('aria-pressed', newPressed ? 'true' : 'false');
+            heartEl.textContent = newPressed ? '♥' : '♡';
+            favStatus.textContent = newPressed ? 'Favorited' : 'Not favorited';
+
+            try {
+              const resp = await fetch('/favorites/toggle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ inv_id: invId })
+              });
+              const data = await resp.json();
+              if (!(data && data.success)) {
+                // revert on failure
+                favBtn.setAttribute('aria-pressed', wasPressed ? 'true' : 'false');
+                heartEl.textContent = wasPressed ? '♥' : '♡';
+                favStatus.textContent = wasPressed ? 'Favorited' : 'Not favorited';
+                if (resp.status === 401) window.location.href = '/account/login';
+                else showMessage(data && data.error ? data.error : 'Unable to toggle favorite', 'error');
+              }
+            } catch (err) {
+              console.error('Favorite error', err);
+              // revert on error
+              favBtn.setAttribute('aria-pressed', wasPressed ? 'true' : 'false');
+              heartEl.textContent = wasPressed ? '♥' : '♡';
+              favStatus.textContent = wasPressed ? 'Favorited' : 'Not favorited';
+              showMessage('Unable to toggle favorite', 'error');
+            }
+      });
+    } catch (e) { console.error('Favorite setup error', e); }
+  })();
+
+  // Toast / queued notifications
+  function showToast(message, type = 'info', timeout = 5000, announceTitle = '') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = 'toast-item ' + (type === 'success' ? 'success' : (type === 'error' ? 'error' : ''));
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+    const msg = document.createElement('div');
+    msg.className = 'toast-message';
+    // include optional item title for screen readers
+    msg.textContent = announceTitle ? `${announceTitle} — ${message}` : message;
+    const close = document.createElement('button');
+    close.className = 'toast-close';
+    close.setAttribute('aria-label', 'Dismiss notification');
+    close.innerHTML = '&times;';
+    close.addEventListener('click', () => { if (toast.parentNode) toast.parentNode.removeChild(toast); });
+    toast.appendChild(msg);
+    toast.appendChild(close);
+    container.appendChild(toast);
+    // focus for keyboard users so they can dismiss
+    close.focus();
+    // auto-dismiss
+    const to = setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, timeout);
+    toast._timeout = to;
+  }
+
+  // backward compatible alias
+  function showMessage(text, type = 'info', timeout = 4000) {
+    const headingText = (typeof heading !== 'undefined' && heading) ? heading : '';
+    showToast(text, type === 'error' ? 'error' : (type === 'success' ? 'success' : 'info'), timeout, headingText);
+  }
+
+  function bindActivateByKeyboard(el) {
+    if (!el) return;
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        el.click();
+      }
+    });
+  }
+
   document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+    bindActivateByKeyboard(btn);
     btn.addEventListener('click', async function() {
       const invId = this.dataset.invId;
+      // optimistic UI: disable button and show temporary message
+      const originalText = this.textContent;
+      this.disabled = true;
+      this.textContent = 'Adding…';
+      showMessage('Adding item to cart...', 'info');
 
       try {
         const response = await fetch('/cart/add', {
@@ -70,23 +303,38 @@
 
         const data = await response.json();
         if (data.success) {
-          alert('Item added to cart!');
-        } else if (data.redirect) {
-          window.location.href = data.redirect;
+          showMessage('Item added to cart.', 'success');
+          // if this page also has a wishlist button for same item, mark it removed (auto-remove)
+          const wishlistBtn = document.querySelector('.add-to-wishlist-btn[data-inv-id="' + invId + '"]');
+          if (wishlistBtn) {
+            wishlistBtn.disabled = true;
+            wishlistBtn.textContent = 'In Cart';
+          }
+        } else if (response.status === 401 || (data.redirect && data.redirect.includes('/login'))) {
+          // Redirect to login if not authenticated
+          window.location.href = data.redirect || '/account/login';
         } else {
-          alert(data.message || 'Error adding to cart');
+          showMessage(data.message || 'Error adding to cart', 'error');
+          this.disabled = false;
+          this.textContent = originalText;
         }
       } catch (error) {
         console.error('Error:', error);
-        alert('Error adding to cart');
+        showMessage('Error adding to cart', 'error');
+        this.disabled = false;
+        this.textContent = originalText;
       }
     });
   });
 
-  // Add to wishlist
   document.querySelectorAll('.add-to-wishlist-btn').forEach(btn => {
+    bindActivateByKeyboard(btn);
     btn.addEventListener('click', async function() {
       const invId = this.dataset.invId;
+      const originalText = this.textContent;
+      this.disabled = true;
+      this.textContent = 'Saving…';
+      showMessage('Adding to wishlist...', 'info');
 
       try {
         const response = await fetch('/wishlist/add', {
@@ -99,17 +347,109 @@
 
         const data = await response.json();
         if (data.success) {
-          alert('Item added to wishlist!');
-        } else if (data.redirect) {
-          window.location.href = data.redirect;
+          showMessage('Item added to wishlist.', 'success');
+          this.textContent = 'In Wishlist';
+        } else if (response.status === 401 || (data.redirect && data.redirect.includes('/login'))) {
+          // Redirect to login if not authenticated
+          window.location.href = data.redirect || '/account/login';
         } else {
-          alert(data.message || 'Error adding to wishlist');
+          showMessage(data.message || 'Error adding to wishlist', 'error');
+          this.disabled = false;
+          this.textContent = originalText;
         }
       } catch (error) {
         console.error('Error:', error);
-        alert('Error adding to wishlist');
+        showMessage('Error adding to wishlist', 'error');
+        this.disabled = false;
+        this.textContent = originalText;
       }
     });
   });
+
+  // Fetch and render ratings (average and user) and allow logged-in users to set rating
+  (function setupRatings() {
+    try {
+      let invId = typeof inv_id !== 'undefined' ? Number(inv_id) : null;
+      if (!invId) {
+        const el = document.querySelector('.add-to-cart-btn') || document.querySelector('.add-to-wishlist-btn');
+        if (el && el.dataset && el.dataset.invId) invId = Number(el.dataset.invId);
+      }
+      if (!invId) return;
+
+      const avgValueEl = document.getElementById('avg-value');
+      const ratingCountEl = document.getElementById('rating-count');
+      const userStarsEl = document.getElementById('user-stars');
+
+      // Helper to render stars into an element (clickable if callback provided)
+      function renderStars(targetEl, value, clickable, onClick) {
+        targetEl.innerHTML = '';
+        for (let i = 1; i <= 5; i++) {
+          const span = document.createElement('span');
+          span.textContent = i <= value ? '★' : '☆';
+          span.className = 'star' + (i <= value ? ' filled' : '');
+          span.dataset.value = i;
+          if (clickable) {
+            span.style.cursor = 'pointer';
+            span.addEventListener('click', () => onClick(i));
+          }
+          targetEl.appendChild(span);
+        }
+      }
+
+      // Load average
+      fetch(`/ratings/item/${invId}`)
+        .then(r => r.json())
+        .then(data => {
+          avgValueEl.textContent = data.average;
+          ratingCountEl.textContent = data.count;
+        })
+        .catch(err => console.error('Failed to load average rating', err));
+
+      // Load user's rating (if logged in). Server will redirect to login in other flows, but here API responds 401
+      fetch(`/ratings/user/${invId}`)
+        .then(r => {
+          if (r.status === 401) return null;
+          return r.json();
+        })
+        .then(data => {
+          const userRating = data && data.rating ? Number(data.rating) : 0;
+          // allow click to save (if logged in)
+          renderStars(userStarsEl, userRating, true, (val) => {
+            // Save via POST
+            fetch('/ratings', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ inv_id: invId, rating: val })
+            })
+              .then(r => r.json())
+              .then(resp => {
+                if (resp && resp.success) {
+                  renderStars(userStarsEl, resp.rating, true, (v) => { /* noop refresh */ });
+                  // refresh average
+                  return fetch(`/ratings/item/${invId}`);
+                }
+                if (resp && resp.error) throw new Error(resp.error);
+              })
+              .then(r => r && r.json())
+              .then(avgResp => {
+                if (avgResp) {
+                  avgValueEl.textContent = avgResp.average;
+                  ratingCountEl.textContent = avgResp.count;
+                }
+              })
+              .catch(err => {
+                console.error('Failed to save rating', err);
+                if (err && err.message && err.message.toLowerCase().includes('unauthorized')) {
+                  window.location.href = '/account/login';
+                }
+              });
+          });
+        })
+        .catch(err => console.error('Failed to load user rating', err));
+
+    } catch (e) {
+      console.error('Ratings setup error', e);
+    }
+  })();
 </script>
 

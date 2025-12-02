@@ -1,0 +1,363 @@
+<div class="search-container">
+  <h1><%= title %></h1>
+
+  <!-- Search Form -->
+  <div class="search-form">
+    <form method="GET" action="/search/results" class="filter-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="keyword">Keyword (Make, Model, Color):</label>
+          <input 
+            type="text" 
+            id="keyword" 
+            name="keyword" 
+            placeholder="Search..." 
+            value="<%= filters.keyword || '' %>"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="classification">Type:</label>
+          <select id="classification" name="classification">
+            <option value="0">All Types</option>
+            <% if (classifications && classifications.length) { %>
+              <% classifications.forEach(c => { %>
+                <option 
+                  value="<%= c.classification_id %>"
+                  <%= filters.classification == c.classification_id ? 'selected' : '' %>
+                >
+                  <%= c.classification_name %>
+                </option>
+              <% }); %>
+            <% } %>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="year">Year:</label>
+          <select id="year" name="year">
+            <option value="0">All Years</option>
+            <% if (years && years.length) { %>
+              <% years.forEach(y => { %>
+                <option 
+                  value="<%= y %>"
+                  <%= filters.year == y ? 'selected' : '' %>
+                >
+                  <%= y %>
+                </option>
+              <% }); %>
+            <% } %>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="make">Make:</label>
+          <select id="make" name="make">
+            <option value="">All Makes</option>
+            <% if (makes && makes.length) { %>
+              <% makes.forEach(m => { %>
+                <option 
+                  value="<%= m %>"
+                  <%= filters.make == m ? 'selected' : '' %>
+                >
+                  <%= m %>
+                </option>
+              <% }); %>
+            <% } %>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="color">Color:</label>
+          <select id="color" name="color">
+            <option value="">All Colors</option>
+            <% if (colors && colors.length) { %>
+              <% colors.forEach(col => { %>
+                <option 
+                  value="<%= col %>"
+                  <%= filters.color == col ? 'selected' : '' %>
+                >
+                  <%= col %>
+                </option>
+              <% }); %>
+            <% } %>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="minPrice">Min Price ($):</label>
+          <input 
+            type="number" 
+            id="minPrice" 
+            name="minPrice" 
+            min="0" 
+            step="100"
+            value="<%= filters.minPrice || '' %>"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="maxPrice">Max Price ($):</label>
+          <input 
+            type="number" 
+            id="maxPrice" 
+            name="maxPrice" 
+            min="0" 
+            step="100"
+            value="<%= filters.maxPrice || '' %>"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="maxMiles">Max Miles:</label>
+          <input 
+            type="number" 
+            id="maxMiles" 
+            name="maxMiles" 
+            min="0" 
+            step="1000"
+            value="<%= filters.maxMiles || '' %>"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="sortBy">Sort By:</label>
+          <select id="sortBy" name="sortBy">
+            <option value="make" <%= filters.sortBy == 'make' ? 'selected' : '' %>>Make (A-Z)</option>
+            <option value="price_low" <%= filters.sortBy == 'price_low' ? 'selected' : '' %>>Price (Low to High)</option>
+            <option value="price_high" <%= filters.sortBy == 'price_high' ? 'selected' : '' %>>Price (High to Low)</option>
+            <option value="year_new" <%= filters.sortBy == 'year_new' ? 'selected' : '' %>>Year (Newest)</option>
+            <option value="year_old" <%= filters.sortBy == 'year_old' ? 'selected' : '' %>>Year (Oldest)</option>
+            <option value="miles_low" <%= filters.sortBy == 'miles_low' ? 'selected' : '' %>>Miles (Lowest)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Search</button>
+        <a href="/search" class="btn btn-secondary">Clear Filters</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Results -->
+  <div class="search-results">
+    <% if (resultCount > 0) { %>
+      <h2>Results: <%= resultCount %> vehicle<%= resultCount !== 1 ? 's' : '' %> found</h2>
+      <div class="vehicles-grid">
+        <% results.forEach(vehicle => { %>
+          <div class="vehicle-card">
+            <div class="vehicle-image">
+              <a href="/inv/detail/<%= vehicle.inv_id %>">
+                <img src="<%= vehicle.inv_thumbnail %>" alt="<%= vehicle.inv_year %> <%= vehicle.inv_make %> <%= vehicle.inv_model %>">
+              </a>
+            </div>
+            <div class="vehicle-info">
+              <h3>
+                <a href="/inv/detail/<%= vehicle.inv_id %>">
+                  <%= vehicle.inv_year %> <%= vehicle.inv_make %> <%= vehicle.inv_model %>
+                </a>
+              </h3>
+              <p class="price">$<%= parseFloat(vehicle.inv_price).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></p>
+              <p class="description"><%= vehicle.inv_description.substring(0, 100) %>...</p>
+              <div class="vehicle-details">
+                <span class="detail">Color: <%= vehicle.inv_color %></span>
+                <span class="detail">Miles: <%= vehicle.inv_miles.toLocaleString() %></span>
+              </div>
+              <a href="/inv/detail/<%= vehicle.inv_id %>" class="btn btn-primary btn-sm">View Details</a>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% } else if (Object.values(filters).some(v => v)) { %>
+      <p class="no-results">No vehicles match your search criteria. Try adjusting your filters.</p>
+    <% } else { %>
+      <p class="no-results">Enter search criteria above to find vehicles.</p>
+    <% } %>
+  </div>
+</div>
+
+<style>
+  .search-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .search-form {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 30px;
+  }
+
+  .filter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-group label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+  }
+
+  .btn-primary {
+    background: #007bff;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #0056b3;
+  }
+
+  .btn-secondary {
+    background: #6c757d;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background: #5a6268;
+  }
+
+  .btn-sm {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .search-results {
+    margin-top: 30px;
+  }
+
+  .search-results h2 {
+    margin-bottom: 20px;
+    color: #333;
+  }
+
+  .vehicles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .vehicle-card {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s;
+  }
+
+  .vehicle-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .vehicle-image {
+    height: 200px;
+    overflow: hidden;
+    background: #f5f5f5;
+  }
+
+  .vehicle-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .vehicle-info {
+    padding: 15px;
+  }
+
+  .vehicle-info h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+  }
+
+  .vehicle-info a {
+    color: #007bff;
+    text-decoration: none;
+  }
+
+  .vehicle-info a:hover {
+    text-decoration: underline;
+  }
+
+  .price {
+    font-size: 18px;
+    font-weight: bold;
+    color: #28a745;
+    margin: 10px 0;
+  }
+
+  .description {
+    color: #666;
+    font-size: 13px;
+    margin: 10px 0;
+    line-height: 1.4;
+  }
+
+  .vehicle-details {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin: 10px 0;
+    font-size: 12px;
+    color: #666;
+  }
+
+  .no-results {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    background: #f9f9f9;
+    border-radius: 5px;
+  }
+</style>

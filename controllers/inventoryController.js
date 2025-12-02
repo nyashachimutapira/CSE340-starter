@@ -1,4 +1,6 @@
 const invModel = require("../models/inventory-model");
+const reviewModel = require("../models/review-model");
+const ratingModel = require("../models/rating-model");
 const utilities = require("../utilities");
 
 const inventoryController = {};
@@ -108,11 +110,33 @@ inventoryController.buildVehicleDetail = async function buildVehicleDetail(req, 
   const detail = utilities.buildVehicleDetail(vehicle, req.account);
   const title = `${vehicle.inv_year} ${vehicle.inv_make} ${vehicle.inv_model}`;
 
+  // Try to load recent reviews and average rating; if tables are missing, continue gracefully
+  let reviews = [];
+  let average = 0;
+  let review_count = 0;
+  try {
+    const [revRows, avg] = await Promise.all([
+      reviewModel.getReviewsByInv(vehicle.inv_id),
+      ratingModel.getAverageRating(vehicle.inv_id),
+    ]);
+    reviews = revRows || [];
+    if (avg) {
+      average = avg.average_rating || 0;
+      review_count = Number(avg.rating_count || 0);
+    }
+  } catch (err) {
+    console.error('Could not load reviews/ratings for detail view:', err && err.message ? err.message : err);
+  }
+
   res.render("inventory/detail", {
     title,
     heading: title,
     nav,
     detail,
+    inv_id: vehicle.inv_id,
+    reviews,
+    average,
+    review_count,
   });
 };
 

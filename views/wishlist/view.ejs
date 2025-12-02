@@ -65,6 +65,9 @@
   <% } %>
 </div>
 
+<!-- Toast container (ARIA live region) -->
+<div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
 <style>
   .wishlist-container {
     max-width: 1200px;
@@ -215,13 +218,78 @@
     border: 1px solid #f5c6cb;
     color: #721c24;
   }
+  /* Focus outline for keyboard users */
+  .btn:focus, .remove-item:focus, .add-to-cart:focus {
+    outline: 3px solid #0056b3;
+    outline-offset: 2px;
+  }
+
+  /* Toast styles */
+  #toast-container { position: fixed; top: 16px; right: 16px; z-index: 1050; }
+  .toast-item { min-width: 220px; max-width: 360px; background: #fff; border: 1px solid #ccc; padding: 10px 12px; margin-bottom: 8px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.12); display:flex; align-items:center; justify-content:space-between; }
+  .toast-item.success { border-color: #c3e6cb; background: #d4edda; }
+  .toast-item.error { border-color: #f5c6cb; background: #f8d7da; }
+  .toast-message { flex: 1; padding-right: 8px; }
+  .toast-close { background: transparent; border: none; cursor: pointer; font-size: 16px; }
 </style>
 
 <script>
-  // Add to cart from wishlist
+  // Toast / queued notifications
+  function showToast(message, type = 'info', timeout = 5000, announceTitle = '') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = 'toast-item ' + (type === 'success' ? 'success' : (type === 'error' ? 'error' : ''));
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+    const msg = document.createElement('div');
+    msg.className = 'toast-message';
+    msg.textContent = announceTitle ? `${announceTitle} — ${message}` : message;
+    const close = document.createElement('button');
+    close.className = 'toast-close';
+    close.setAttribute('aria-label', 'Dismiss notification');
+    close.innerHTML = '&times;';
+    close.addEventListener('click', () => { if (toast.parentNode) toast.parentNode.removeChild(toast); });
+    toast.appendChild(msg);
+    toast.appendChild(close);
+    container.appendChild(toast);
+    close.focus();
+    const to = setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, timeout);
+    toast._timeout = to;
+  }
+
+  // backward compatible alias
+  function showMessage(text, type = 'info', timeout = 4000) {
+    showToast(text, type === 'error' ? 'error' : (type === 'success' ? 'success' : 'info'), timeout);
+  }
+
+  function bindActivateByKeyboard(el) {
+    if (!el) return;
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        el.click();
+      }
+    });
+  }
+
+  // Add to cart from wishlist (optimistic: remove item from DOM immediately)
   document.querySelectorAll('.add-to-cart').forEach(btn => {
+    bindActivateByKeyboard(btn);
     btn.addEventListener('click', async function() {
       const invId = this.dataset.invId;
+      const wishlistItemEl = this.closest('.wishlist-item');
+      const wishlistId = wishlistItemEl ? wishlistItemEl.dataset.wishlistId : null;
+
+      // optimistic remove from DOM
+      let placeholder = null;
+      if (wishlistItemEl) {
+        placeholder = document.createComment('wishlist-placeholder-' + (wishlistId || invId));
+        wishlistItemEl.parentNode.insertBefore(placeholder, wishlistItemEl.nextSibling);
+        wishlistItemEl.remove();
+      }
+
+      showMessage('Adding item to cart...', 'info');
 
       try {
         const response = await fetch('/cart/add', {
@@ -234,42 +302,68 @@
 
         const data = await response.json();
         if (data.success) {
-          alert('Item added to cart!');
-          // Optionally remove from wishlist or just show message
+          showMessage('Item added to cart.', 'success');
         } else {
-          alert(data.message || 'Error adding to cart');
+          showMessage(data.message || 'Error adding to cart', 'error');
+          // rollback: reinsert wishlist item
+          if (placeholder && placeholder.parentNode) {
+            placeholder.parentNode.insertBefore(wishlistItemEl, placeholder);
+            placeholder.remove();
+          }
         }
       } catch (error) {
         console.error('Error:', error);
-        alert('Error adding to cart');
+        showMessage('Error adding to cart', 'error');
+        if (placeholder && placeholder.parentNode) {
+          placeholder.parentNode.insertBefore(wishlistItemEl, placeholder);
+          placeholder.remove();
+        }
       }
     });
   });
 
-  // Remove from wishlist
+  // Remove from wishlist (optimistic)
   document.querySelectorAll('.remove-item').forEach(btn => {
+    bindActivateByKeyboard(btn);
     btn.addEventListener('click', async function() {
       const wishlistId = this.dataset.wishlistId;
+      if (!confirm('Are you sure you want to remove this item from your wishlist?')) return;
 
-      if (confirm('Are you sure you want to remove this item from your wishlist?')) {
-        try {
-          const response = await fetch('/wishlist/remove', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ wishlistId })
-          });
+      const wishlistItemEl = this.closest('.wishlist-item');
+      let placeholder = null;
+      if (wishlistItemEl) {
+        placeholder = document.createComment('wishlist-placeholder-remove-' + wishlistId);
+        wishlistItemEl.parentNode.insertBefore(placeholder, wishlistItemEl.nextSibling);
+        wishlistItemEl.remove();
+      }
 
-          const data = await response.json();
-          if (data.success) {
-            location.reload();
-          } else {
-            alert(data.message || 'Error removing item');
+      showMessage('Removing item from wishlist...', 'info');
+
+      try {
+        const response = await fetch('/wishlist/remove', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ wishlistId })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          showMessage('Item removed from wishlist.', 'success');
+        } else {
+          showMessage(data.message || 'Error removing item', 'error');
+          if (placeholder && placeholder.parentNode) {
+            placeholder.parentNode.insertBefore(wishlistItemEl, placeholder);
+            placeholder.remove();
           }
-        } catch (error) {
-          console.error('Error:', error);
-          alert('Error removing item');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showMessage('Error removing item', 'error');
+        if (placeholder && placeholder.parentNode) {
+          placeholder.parentNode.insertBefore(wishlistItemEl, placeholder);
+          placeholder.remove();
         }
       }
     });

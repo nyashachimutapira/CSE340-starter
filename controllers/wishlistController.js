@@ -7,7 +7,9 @@ const wishlistController = {};
 wishlistController.viewWishlist = async function viewWishlist(req, res) {
   try {
     if (!req.account) {
-      req.flash("notice", "Please log in to view your wishlist.");
+      if (req.flash) {
+        req.flash("notice", "Please log in to view your wishlist.");
+      }
       return res.redirect("/account/login");
     }
 
@@ -19,10 +21,15 @@ wishlistController.viewWishlist = async function viewWishlist(req, res) {
       nav,
       wishlistItems,
       itemCount: wishlistItems.length,
+      notices: (req.flash && req.flash("notice")) || [],
+      errors: (req.flash && req.flash("error")) || [],
+      success: (req.flash && req.flash("success")) || [],
     });
   } catch (err) {
     console.error("Wishlist view error:", err);
-    req.flash("error", "Unable to load your wishlist. Please try again.");
+    if (req.flash) {
+      req.flash("error", "Unable to load your wishlist. Please try again.");
+    }
     res.redirect("/");
   }
 };
@@ -30,7 +37,18 @@ wishlistController.viewWishlist = async function viewWishlist(req, res) {
 wishlistController.addToWishlist = async function addToWishlist(req, res) {
   try {
     if (!req.account) {
-      req.flash("notice", "Please log in to add items to your wishlist.");
+      // If it's a JSON request (from fetch), return JSON response
+      if (req.accepts('json')) {
+        return res.status(401).json({
+          success: false,
+          message: "Please log in to add items to your wishlist.",
+          redirect: "/account/login"
+        });
+      }
+      // Otherwise redirect (for form submissions)
+      if (req.flash) {
+        req.flash("notice", "Please log in to add items to your wishlist.");
+      }
       return res.redirect("/account/login");
     }
 
@@ -60,7 +78,9 @@ wishlistController.addToWishlist = async function addToWishlist(req, res) {
     }
 
     await wishlistModel.addToWishlist(req.account.account_id, invId);
-    req.flash("success", `${vehicle.inv_year} ${vehicle.inv_make} ${vehicle.inv_model} added to wishlist.`);
+    if (req.flash) {
+      req.flash("success", `${vehicle.inv_year} ${vehicle.inv_make} ${vehicle.inv_model} added to wishlist.`);
+    }
 
     res.json({
       success: true,
@@ -95,7 +115,9 @@ wishlistController.removeFromWishlist = async function removeFromWishlist(req, r
     }
 
     await wishlistModel.removeFromWishlist(wishlistId);
-    req.flash("success", "Item removed from wishlist.");
+    if (req.flash) {
+      req.flash("success", "Item removed from wishlist.");
+    }
 
     res.json({
       success: true,

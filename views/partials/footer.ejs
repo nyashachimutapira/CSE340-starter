@@ -1,6 +1,37 @@
 <% const d = new Date()
 let year = d.getFullYear() %>
 <footer>
-  <p class="copyright">&copy; <%= year %>, CSE 340 App</p>
-  <p><a href="/error/trigger">System status check</a></p>
+  <div class="footer-content">
+    <p class="copyright">&copy; <%= year %>, CSE 340 App</p>
+    <a href="/error/trigger">System status check</a>
+    <% if (account) { %>
+      <div class="footer-links">
+        <a href="/cart" title="View shopping cart">🛒 Cart</a>
+        <a href="/wishlist" title="View wishlist">❤️ Wishlist</a>
+      </div>
+    <% } %>
+  </div>
 </footer>
+
+<style>
+  footer .footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+  }
+
+  footer .footer-links {
+    display: flex;
+    gap: 15px;
+  }
+
+  footer .footer-links a {
+    text-decoration: none;
+    color: #007bff;
+  }
+
+  footer .footer-links a:hover {
+    text-decoration: underline;
+  }
+</style>

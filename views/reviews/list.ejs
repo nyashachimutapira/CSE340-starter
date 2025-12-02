@@ -1,0 +1,20 @@
+<main>
+   <h1>Reviews</h1>
+   <p>Average rating: <strong><%= average %></strong> (<%= review_count %> reviews)</p>  <div class="reviews-list">
+    <% if (!reviews || !reviews.length) { %>
+      <p class="notice">No reviews yet. Be the first to <a href="/reviews/add/<%= inv_id %>">add a review</a>.</p>
+    <% } else { %>
+      <% reviews.forEach(function(r) { %>
+        <article class="review">
+          <header>
+            <h3><%= r.account_firstname %> <%= r.account_lastname %></h3>
+            <p class="meta">Rated: <%= r.rating %> — <%= new Date(r.created_at).toLocaleString() %></p>
+          </header>
+          <div class="body"><p><%= r.review_text || '' %></p></div>
+        </article>
+      <% }) %>
+    <% } %>
+  </div>
+
+  <p><a href="/reviews/add/<%= inv_id %>" class="btn btn-primary">Add a review</a></p>
+</main>

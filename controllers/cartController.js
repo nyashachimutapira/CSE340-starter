@@ -7,7 +7,9 @@ const cartController = {};
 cartController.viewCart = async function viewCart(req, res) {
   try {
     if (!req.account) {
-      req.flash("notice", "Please log in to view your cart.");
+      if (req.flash) {
+        req.flash("notice", "Please log in to view your cart.");
+      }
       return res.redirect("/account/login");
     }
 
@@ -25,10 +27,15 @@ cartController.viewCart = async function viewCart(req, res) {
       cartItems,
       total: total.toFixed(2),
       itemCount: cartItems.length,
+      notices: (req.flash && req.flash("notice")) || [],
+      errors: (req.flash && req.flash("error")) || [],
+      success: (req.flash && req.flash("success")) || [],
     });
   } catch (err) {
     console.error("Cart view error:", err);
-    req.flash("error", "Unable to load your cart. Please try again.");
+    if (req.flash) {
+      req.flash("error", "Unable to load your cart. Please try again.");
+    }
     res.redirect("/");
   }
 };
@@ -36,7 +43,18 @@ cartController.viewCart = async function viewCart(req, res) {
 cartController.addToCart = async function addToCart(req, res) {
   try {
     if (!req.account) {
-      req.flash("notice", "Please log in to add items to your cart.");
+      // If it's a JSON request (from fetch), return JSON response
+      if (req.accepts('json')) {
+        return res.status(401).json({
+          success: false,
+          message: "Please log in to add items to your cart.",
+          redirect: "/account/login"
+        });
+      }
+      // Otherwise redirect (for form submissions)
+      if (req.flash) {
+        req.flash("notice", "Please log in to add items to your cart.");
+      }
       return res.redirect("/account/login");
     }
 
@@ -58,7 +76,9 @@ cartController.addToCart = async function addToCart(req, res) {
     }
 
     await cartModel.addToCart(req.account.account_id, invId, quantity);
-    req.flash("success", `${vehicle.inv_year} ${vehicle.inv_make} ${vehicle.inv_model} added to cart.`);
+    if (req.flash) {
+      req.flash("success", `${vehicle.inv_year} ${vehicle.inv_make} ${vehicle.inv_model} added to cart.`);
+    }
 
     res.json({
       success: true,
@@ -133,7 +153,9 @@ cartController.removeItem = async function removeItem(req, res) {
     }
 
     await cartModel.removeFromCart(cartId);
-    req.flash("success", "Item removed from cart.");
+    if (req.flash) {
+      req.flash("success", "Item removed from cart.");
+    }
 
     res.json({
       success: true,
@@ -158,7 +180,9 @@ cartController.clearCart = async function clearCart(req, res) {
     }
 
     await cartModel.clearCart(req.account.account_id);
-    req.flash("success", "Cart cleared.");
+    if (req.flash) {
+      req.flash("success", "Cart cleared.");
+    }
 
     res.json({
       success: true,

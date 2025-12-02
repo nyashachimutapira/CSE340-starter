@@ -284,3 +284,32 @@ SET inv_image = REPLACE(inv_image, '/images/', '/images/vehicles/'),
     inv_thumbnail = REPLACE(inv_thumbnail, '/images/', '/images/vehicles/')
 WHERE inv_image LIKE '/images/%' AND inv_image NOT LIKE '/images/vehicles/%';
 
+-- Insert sample reviews
+INSERT INTO public.reviews (inv_id, account_id, rating, review_text) VALUES
+(1, 1, 5, 'Excellent vehicle! Very reliable and comfortable.'),
+(1, 2, 4, 'Great car, good condition. Highly recommend.'),
+(2, 1, 5, 'Amazing performance and fuel efficiency.'),
+(3, 3, 3, 'Good car but needs some maintenance.');
+
+-- Insert sample ratings
+INSERT INTO public.ratings (inv_id, account_id, rating) VALUES
+(1, 1, 5),
+(1, 2, 4),
+(2, 1, 5),
+(3, 3, 3),
+(4, 2, 4);
+
+-- Insert sample favorites
+INSERT INTO public.favorites (inv_id, account_id) VALUES
+(1, 1),
+(2, 1),
+(3, 2),
+(4, 3);
+
+-- Insert sample shopping cart items
+INSERT INTO public.shopping_cart (account_id, inv_id, quantity) VALUES
+(1, 1, 1),    -- Account 1 has Camaro in cart
+(1, 5, 2),    -- Account 1 has Wrangler in cart (quantity 2)
+(2, 2, 1),    -- Account 2 has Batmobile in cart
+(3, 7, 1);    -- Account 3 has Aerocar in cart
+

@@ -19,11 +19,15 @@ if (process.env.NODE_ENV !== "production") {
 const app = express();
 const staticRoutes = require("./routes/static");
 const inventoryRoute = require("./routes/inventoryRoute");
+const reviewRoute = require("./routes/reviewRoute");
+const ratingRoute = require("./routes/ratingRoute");
+const favoriteRoute = require("./routes/favoriteRoute");
 const accountRoute = require("./routes/accountRoute");
 const adminRoute = require("./routes/adminRoute");
 const errorRoute = require("./routes/errorRoute");
 const cartRoute = require("./routes/cartRoute");
 const wishlistRoute = require("./routes/wishlistRoute");
+const orderRoute = require("./routes/orderRoute");
 const utilities = require("./utilities");
 const pool = require("./database/");
 
@@ -79,11 +83,15 @@ app.use(async (req, res, next) => {
  * Routes
  *************************/
 app.use("/inv", inventoryRoute);
+app.use("/reviews", reviewRoute);
+app.use("/ratings", ratingRoute);
+app.use("/favorites", favoriteRoute);
 app.use("/account", accountRoute);
 app.use("/admin", adminRoute);
 app.use("/error", errorRoute);
 app.use("/cart", cartRoute);
 app.use("/wishlist", wishlistRoute);
+app.use("/order", orderRoute);
 
 // Index route
 app.get(
@@ -136,11 +144,21 @@ const PORT = process.env.PORT || 5500;
 const HOST = process.env.HOST || "0.0.0.0"; // Use 0.0.0.0 for Render compatibility
 
 /* ***********************
- * Start the server
+ * Start the server (capture server and handle listen errors)
  *************************/
-app.listen(PORT, HOST, () => {
+const server = app.listen(PORT, HOST, () => {
   console.log(`Server running on port ${PORT}`);
   if (process.env.NODE_ENV !== "production") {
     console.log(`Local access: http://localhost:${PORT}`);
   }
+});
+
+server.on("error", (err) => {
+  if (err && err.code === "EADDRINUSE") {
+    console.error(`Port ${PORT} is already in use. ` +
+      `If you have another instance running, stop it or set a different PORT (e.g. PORT=5501).`);
+    process.exit(1);
+  }
+  console.error("Server error:", err);
+  process.exit(1);
 });

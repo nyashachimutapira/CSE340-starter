@@ -4,10 +4,64 @@
 <div class="account-management">
   <h2>Welcome <%= account.account_firstname %></h2>
 
-  <p><a href="/account/update/<%= account.account_id %>">Update Account Information</a></p>
+  <div class="account-links">
+    <h3>Account Settings</h3>
+    <p><a href="/account/profile">View My Profile</a></p>
+    <p><a href="/account/profile/edit">Edit My Profile</a></p>
+    <p><a href="/account/update/<%= account.account_id %>">Update Account Information</a></p>
+  </div>
+
+  <div class="shopping-links">
+    <h3>Shopping</h3>
+    <p><a href="/order/history">View Order History</a></p>
+    <p><a href="/cart">View Cart</a></p>
+    <p><a href="/wishlist">View Wishlist</a></p>
+  </div>
 
   <% if (account.account_type === 'Employee' || account.account_type === 'Admin') { %>
-    <h3>Inventory Management</h3>
-    <p><a href="/inv/">Manage Inventory</a></p>
+    <div class="admin-links">
+      <h3>Inventory Management</h3>
+      <p><a href="/inv/">Manage Inventory</a></p>
+    </div>
   <% } %>
 </div>
+
+<style>
+  .account-management {
+    max-width: 600px;
+    margin: 20px auto;
+  }
+
+  .account-management h2 {
+    margin-bottom: 30px;
+  }
+
+  .account-links, .shopping-links, .admin-links {
+    margin-bottom: 30px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background: #f9f9f9;
+  }
+
+  .account-links h3, .shopping-links h3, .admin-links h3 {
+    margin-top: 0;
+  }
+
+  .account-links p, .shopping-links p, .admin-links p {
+    margin: 10px 0;
+  }
+
+  .account-links a, .shopping-links a, .admin-links a {
+    color: #007bff;
+    text-decoration: none;
+    padding: 8px 12px;
+    display: inline-block;
+    border-radius: 3px;
+  }
+
+  .account-links a:hover, .shopping-links a:hover, .admin-links a:hover {
+    background: #e7f1ff;
+    text-decoration: underline;
+  }
+</style>
