@@ -28,6 +28,8 @@ const errorRoute = require("./routes/errorRoute");
 const cartRoute = require("./routes/cartRoute");
 const wishlistRoute = require("./routes/wishlistRoute");
 const orderRoute = require("./routes/orderRoute");
+const checkoutRoute = require("./routes/checkoutRoute");
+const currencyRoute = require("./routes/currencyRoute");
 const utilities = require("./utilities");
 const pool = require("./database/");
 
@@ -64,6 +66,7 @@ app.use(utilities.checkJWTToken);
 app.use(async (req, res, next) => {
   try {
     res.locals.nav = await utilities.getNav();
+    res.locals.account = req.account || null;
     res.locals.notice = req.flash("notice");
     res.locals.error = req.flash("error");
     res.locals.success = req.flash("success");
@@ -72,6 +75,7 @@ app.use(async (req, res, next) => {
     // If nav fails, provide a fallback so the app doesn't crash
     console.error("Navigation error:", err.message);
     res.locals.nav = '<ul id="primary-nav"><li><a href="/">Home</a></li></ul>';
+    res.locals.account = req.account || null;
     res.locals.notice = req.flash("notice");
     res.locals.error = req.flash("error");
     res.locals.success = req.flash("success");
@@ -92,6 +96,8 @@ app.use("/error", errorRoute);
 app.use("/cart", cartRoute);
 app.use("/wishlist", wishlistRoute);
 app.use("/order", orderRoute);
+app.use("/checkout", checkoutRoute);
+app.use("/currency", currencyRoute);
 
 // Index route
 app.get(

@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const invModel = require("../models/inventory-model");
+const currency = require("./currency");
 
 const JWT_SECRET = process.env.ACCESS_TOKEN_SECRET || "cse340_jwt_secret";
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "1h";
@@ -248,6 +249,34 @@ utilities.checkAccountType = function (req, res, next) {
   }
   req.flash("notice", "You are not authorized to access this resource.");
   return res.redirect("/account/login");
+};
+
+/**
+ * Format price in specified currency
+ * @param {number} priceUSD - Price in US Dollars
+ * @param {string} curr - Currency code (USD, EUR, ZWD)
+ * @returns {string} Formatted price
+ */
+utilities.formatPrice = function(priceUSD, curr = 'USD') {
+  return currency.formatPrice(priceUSD, curr);
+};
+
+/**
+ * Convert price to target currency
+ * @param {number} priceUSD - Price in US Dollars
+ * @param {string} curr - Currency code (USD, EUR, ZWD)
+ * @returns {number} Converted price
+ */
+utilities.convertPrice = function(priceUSD, curr = 'USD') {
+  return currency.convertPrice(priceUSD, curr);
+};
+
+/**
+ * Get all available currencies
+ * @returns {Array} List of currency objects
+ */
+utilities.getAvailableCurrencies = function() {
+  return currency.getAvailableCurrencies();
 };
 
 module.exports = utilities;

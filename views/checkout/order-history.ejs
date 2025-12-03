@@ -1,0 +1,268 @@
+<div class="order-history-container">
+  <div class="history-header">
+    <h1>Order History</h1>
+    <p>View and track your orders</p>
+  </div>
+
+  <!-- Flash Messages -->
+  <% if (notices && notices.length) { %>
+    <div class="alert alert-notice">
+      <% notices.forEach(notice => { %>
+        <p><%= notice %></p>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <% if (errors && errors.length) { %>
+    <div class="alert alert-error">
+      <% errors.forEach(error => { %>
+        <p><%= error %></p>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <% if (success && success.length) { %>
+    <div class="alert alert-success">
+      <% success.forEach(msg => { %>
+        <p><%= msg %></p>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <!-- Orders List -->
+  <% if (orders && orders.length > 0) { %>
+    <div class="orders-list">
+      <% orders.forEach(order => { %>
+        <div class="order-card">
+          <div class="order-header">
+            <div class="order-title">
+              <h2>Order #<%= order.order_id %></h2>
+              <p class="order-date"><%= new Date(order.order_date).toLocaleDateString() %></p>
+            </div>
+            <div class="order-meta">
+              <span class="status status-<%= order.status %>"><%= order.status.toUpperCase() %></span>
+              <p class="order-total">Total: $<%= parseFloat(order.total_amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></p>
+            </div>
+          </div>
+          <div class="order-action">
+            <a href="/checkout/confirmation/<%= order.order_id %>" class="btn-link">View Details</a>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  <% } else { %>
+    <div class="empty-state">
+      <div class="empty-icon">📦</div>
+      <h2>No Orders Yet</h2>
+      <p>You haven't placed any orders yet.</p>
+      <a href="/" class="btn btn-primary">Start Shopping</a>
+    </div>
+  <% } %>
+</div>
+
+<style>
+  .order-history-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  .history-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .history-header h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .history-header p {
+    color: #666;
+    font-size: 1.1rem;
+  }
+
+  .orders-list {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .order-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .order-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .order-title h2 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.2rem;
+  }
+
+  .order-date {
+    margin: 0;
+    color: #666;
+    font-size: 0.95rem;
+  }
+
+  .order-meta {
+    text-align: right;
+  }
+
+  .status {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+
+  .status-confirmed {
+    background-color: #d4edda;
+    color: #155724;
+  }
+
+  .status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+
+  .status-shipped {
+    background-color: #d1ecf1;
+    color: #0c5460;
+  }
+
+  .status-delivered {
+    background-color: #d4edda;
+    color: #155724;
+  }
+
+  .status-cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+
+  .order-total {
+    margin: 0;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .order-action {
+    text-align: right;
+  }
+
+  .btn-link {
+    color: #007bff;
+    text-decoration: none;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border: 1px solid #007bff;
+    border-radius: 4px;
+    display: inline-block;
+    transition: all 0.3s ease;
+  }
+
+  .btn-link:hover {
+    background-color: #007bff;
+    color: white;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    background: #f9f9f9;
+    border-radius: 8px;
+  }
+
+  .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .empty-state h2 {
+    margin: 0 0 0.5rem 0;
+  }
+
+  .empty-state p {
+    color: #666;
+    margin-bottom: 1.5rem;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary {
+    background-color: #007bff;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: #0056b3;
+  }
+
+  .alert {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+  }
+
+  .alert-notice {
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+  }
+
+  .alert-error {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+  }
+
+  .alert-success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+  }
+
+  @media (max-width: 768px) {
+    .order-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .order-meta {
+      text-align: left;
+      margin-top: 1rem;
+      width: 100%;
+    }
+
+    .order-action {
+      text-align: left;
+    }
+  }
+</style>

@@ -1,0 +1,408 @@
+<div class="confirmation-container">
+  <div class="confirmation-header">
+    <div class="confirmation-badge">✓</div>
+    <h1>Order Confirmed!</h1>
+    <p>Thank you for your purchase</p>
+  </div>
+
+  <!-- Flash Messages -->
+  <% if (notices && notices.length) { %>
+    <div class="alert alert-notice">
+      <% notices.forEach(notice => { %>
+        <p><%= notice %></p>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <% if (errors && errors.length) { %>
+    <div class="alert alert-error">
+      <% errors.forEach(error => { %>
+        <p><%= error %></p>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <% if (success && success.length) { %>
+    <div class="alert alert-success">
+      <% success.forEach(msg => { %>
+        <p><%= msg %></p>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <!-- Order Details -->
+  <div class="order-details">
+    <div class="detail-card">
+      <h2>Order Details</h2>
+      <div class="detail-row">
+        <span class="label">Order Number:</span>
+        <span class="value">#<%= order.order_id %></span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Order Date:</span>
+        <span class="value"><%= new Date(order.order_date).toLocaleDateString() %></span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Status:</span>
+        <span class="value status status-<%= order.status %>"><%= order.status.toUpperCase() %></span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Total Amount:</span>
+        <span class="value total">$<%= parseFloat(order.total_amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+      </div>
+    </div>
+
+    <!-- Items Ordered -->
+    <div class="detail-card">
+      <h2>Items Ordered</h2>
+      <table class="order-items">
+        <thead>
+          <tr>
+            <th>Vehicle</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% order.items.forEach(item => { %>
+            <tr>
+              <td>
+                <div class="item-info">
+                  <img src="<%= item.inv_image %>" alt="<%= item.inv_make %>">
+                  <div>
+                    <strong><%= item.inv_year %> <%= item.inv_make %> <%= item.inv_model %></strong>
+                  </div>
+                </div>
+              </td>
+              <td>$<%= item.price_at_purchase.toLocaleString() %></td>
+              <td><%= item.quantity %></td>
+              <td>$<%= (item.price_at_purchase * item.quantity).toLocaleString() %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Shipping Information -->
+    <div class="detail-card">
+      <h2>Shipping Address</h2>
+      <div class="address-info">
+        <p><strong>Shipping Address:</strong></p>
+        <p>Shipping address will be confirmed via email shortly.</p>
+        <p class="confirmation-email">A confirmation email has been sent to your registered email address.</p>
+      </div>
+    </div>
+
+    <!-- What's Next -->
+    <div class="detail-card">
+      <h2>What's Next?</h2>
+      <div class="next-steps">
+        <div class="step">
+          <span class="step-number">1</span>
+          <div class="step-content">
+            <h3>Confirmation</h3>
+            <p>Check your email for order confirmation and tracking details.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-number">2</span>
+          <div class="step-content">
+            <h3>Processing</h3>
+            <p>Your order will be processed and prepared for delivery.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-number">3</span>
+          <div class="step-content">
+            <h3>Delivery</h3>
+            <p>We'll send you tracking information once your order ships.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="confirmation-actions">
+    <a href="/checkout/order-history" class="btn btn-primary">View Order History</a>
+    <a href="/" class="btn btn-secondary">Continue Shopping</a>
+  </div>
+</div>
+
+<style>
+  .confirmation-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  .confirmation-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .confirmation-badge {
+    display: inline-block;
+    width: 80px;
+    height: 80px;
+    background-color: #28a745;
+    color: white;
+    border-radius: 50%;
+    font-size: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+
+  .confirmation-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+
+  .confirmation-header p {
+    color: #666;
+    font-size: 1.2rem;
+  }
+
+  .order-details {
+    margin-bottom: 2rem;
+  }
+
+  .detail-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .detail-card h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 1rem;
+  }
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .detail-row:last-child {
+    border-bottom: none;
+  }
+
+  .detail-row .label {
+    font-weight: bold;
+    color: #666;
+  }
+
+  .detail-row .value {
+    color: #333;
+  }
+
+  .detail-row .total {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #007bff;
+  }
+
+  .status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: bold;
+  }
+
+  .status-confirmed {
+    background-color: #d4edda;
+    color: #155724;
+  }
+
+  .status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+
+  .status-shipped {
+    background-color: #d1ecf1;
+    color: #0c5460;
+  }
+
+  .status-delivered {
+    background-color: #d4edda;
+    color: #155724;
+  }
+
+  .order-items {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .order-items thead {
+    background-color: #f9f9f9;
+  }
+
+  .order-items th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: bold;
+    border-bottom: 2px solid #ddd;
+  }
+
+  .order-items td {
+    padding: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .item-info {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .item-info img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+
+  .address-info p {
+    margin: 0.5rem 0;
+    color: #333;
+  }
+
+  .confirmation-email {
+    color: #666;
+    font-size: 0.95rem;
+    font-style: italic;
+    margin-top: 1rem;
+  }
+
+  .next-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .step {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .step-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 50%;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+
+  .step-content h3 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+  }
+
+  .step-content p {
+    margin: 0;
+    color: #666;
+    font-size: 0.95rem;
+  }
+
+  .confirmation-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    padding: 2rem 0;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary {
+    background-color: #007bff;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: #0056b3;
+  }
+
+  .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background-color: #545b62;
+  }
+
+  .alert {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+  }
+
+  .alert-notice {
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+  }
+
+  .alert-error {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+  }
+
+  .alert-success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+  }
+
+  @media (max-width: 768px) {
+    .confirmation-badge {
+      width: 60px;
+      height: 60px;
+      font-size: 2rem;
+    }
+
+    .confirmation-header h1 {
+      font-size: 1.8rem;
+    }
+
+    .detail-row {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .confirmation-actions {
+      flex-direction: column;
+    }
+
+    .btn {
+      width: 100%;
+    }
+  }
+</style>

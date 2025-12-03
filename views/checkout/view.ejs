@@ -1,0 +1,353 @@
+<div class="checkout-container">
+  <div class="checkout-header">
+    <h1>Checkout</h1>
+    <p>Review your order before completing purchase</p>
+  </div>
+
+  <!-- Flash Messages -->
+  <% if (notices && notices.length) { %>
+    <div class="alert alert-notice">
+      <% notices.forEach(notice => { %>
+        <p><%= notice %></p>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <% if (errors && errors.length) { %>
+    <div class="alert alert-error">
+      <% errors.forEach(error => { %>
+        <p><%= error %></p>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <% if (success && success.length) { %>
+    <div class="alert alert-success">
+      <% success.forEach(msg => { %>
+        <p><%= msg %></p>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <!-- Checkout Content -->
+  <div class="checkout-content">
+    <!-- Order Summary -->
+    <div class="order-summary">
+      <h2>Order Summary</h2>
+      <div class="summary-info">
+        <p><strong>Items:</strong> <%= itemCount %></p>
+        <p><strong>Subtotal:</strong> $<%= total %></p>
+        <p><strong>Shipping:</strong> <span class="shipping-cost">FREE</span></p>
+        <p><strong>Tax:</strong> <span class="tax-amount">Calculated at confirmation</span></p>
+        <div class="summary-total">
+          <strong>Total: $<%= total %></strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Items List -->
+    <div class="checkout-items">
+      <h2>Order Items</h2>
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th>Vehicle</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% cartItems.forEach(item => { %>
+            <tr class="item-row">
+              <td class="item-info">
+                <div class="item-image">
+                  <img src="<%= item.inv_thumbnail %>" alt="<%= item.inv_year %> <%= item.inv_make %> <%= item.inv_model %>">
+                </div>
+                <div class="item-details">
+                  <h3><%= item.inv_year %> <%= item.inv_make %> <%= item.inv_model %></h3>
+                  <p class="item-color">Color: <%= item.inv_color %></p>
+                </div>
+              </td>
+              <td class="item-price">$<%= item.inv_price.toLocaleString() %></td>
+              <td class="item-quantity"><%= item.quantity %></td>
+              <td class="item-subtotal">$<%= (item.inv_price * item.quantity).toLocaleString() %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Billing Address -->
+    <div class="billing-section">
+      <h2>Billing Address</h2>
+      <div class="address-display">
+        <p><strong><%= account.account_firstname %> <%= account.account_lastname %></strong></p>
+        <p><%= account.account_email %></p>
+        <p class="address-note">Shipping address will be collected in next step</p>
+      </div>
+    </div>
+
+    <!-- Checkout Actions -->
+    <div class="checkout-actions">
+      <button class="btn btn-primary" id="processCheckoutBtn">
+        Complete Purchase
+      </button>
+      <a href="/cart" class="btn btn-secondary">
+        Back to Cart
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .checkout-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  .checkout-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .checkout-header h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .checkout-header p {
+    color: #666;
+    font-size: 1.1rem;
+  }
+
+  .checkout-content {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .order-summary {
+    background: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 8px;
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+  }
+
+  .order-summary h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+
+  .summary-info p {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .summary-info p:last-of-type {
+    border-bottom: none;
+  }
+
+  .summary-total {
+    font-size: 1.3rem;
+    padding-top: 1rem;
+    border-top: 2px solid #333;
+    margin-top: 1rem;
+  }
+
+  .items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2rem;
+  }
+
+  .items-table thead {
+    background-color: #f0f0f0;
+  }
+
+  .items-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: bold;
+    border-bottom: 2px solid #ddd;
+  }
+
+  .items-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .item-info {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .item-image {
+    flex-shrink: 0;
+  }
+
+  .item-image img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+
+  .item-details h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1rem;
+  }
+
+  .item-color {
+    color: #666;
+    font-size: 0.9rem;
+  }
+
+  .item-price,
+  .item-quantity,
+  .item-subtotal {
+    text-align: right;
+  }
+
+  .billing-section {
+    background: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+  }
+
+  .billing-section h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+
+  .address-display p {
+    margin: 0.25rem 0;
+  }
+
+  .address-note {
+    color: #999;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+  }
+
+  .checkout-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary {
+    background-color: #007bff;
+    color: white;
+    min-width: 200px;
+  }
+
+  .btn-primary:hover {
+    background-color: #0056b3;
+  }
+
+  .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background-color: #545b62;
+  }
+
+  .alert {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+  }
+
+  .alert-notice {
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+  }
+
+  .alert-error {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+  }
+
+  .alert-success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+  }
+
+  @media (max-width: 768px) {
+    .checkout-content {
+      grid-template-columns: 1fr;
+    }
+
+    .order-summary {
+      position: static;
+    }
+
+    .item-info {
+      flex-direction: column;
+    }
+
+    .checkout-actions {
+      flex-direction: column;
+    }
+
+    .btn {
+      width: 100%;
+    }
+  }
+</style>
+
+<script>
+  document.getElementById("processCheckoutBtn").addEventListener("click", async function() {
+    this.disabled = true;
+    this.textContent = "Processing...";
+
+    try {
+      const response = await fetch("/checkout/process", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        window.location.href = data.redirect;
+      } else {
+        alert("Error: " + data.message);
+        this.disabled = false;
+        this.textContent = "Complete Purchase";
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      alert("An error occurred. Please try again.");
+      this.disabled = false;
+      this.textContent = "Complete Purchase";
+    }
+  });
+</script>
